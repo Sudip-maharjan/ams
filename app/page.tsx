@@ -66,7 +66,7 @@ export default function Home() {
                 <h4 className="text-2xl font-bold text-slate-800 flex items-center gap-2">
                   Welcome & Instructions
                 </h4>
-                <p className="text-slate-600 mt-2 leading-relaxed">
+                <p className="text-slate-600 mt-2 leading-relaxed text-lg">
                   Welcome to the IOM Online Student Admission Application
                   Portal. Ensure all provided information is accurate and
                   matches your documents.
@@ -116,7 +116,7 @@ export default function Home() {
                     </th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-slate-300">
                   {docReqs.map((doc) => (
                     <tr key={doc.id}>
                       <td className="px-4 py-4 text-s text-slate-700 font-medium">
@@ -146,9 +146,9 @@ export default function Home() {
                       className="flex items-center gap-3 text-s text-slate-700 group"
                     >
                       <div className="w-6 h-6 rounded-full bg-pink-50 flex items-center justify-center shrink-0 group-hover:bg-pink-100 transition-colors">
-                        <item.icon className="w-3.5 h-3.5 text-pink-500" />
+                        <item.icon className="w-5 h-5 text-pink-500" />
                       </div>
-                      {item.text}
+                      <p className="font-semibold">{item.text}</p>
                     </li>
                   ))}
                 </ul>
@@ -164,9 +164,9 @@ export default function Home() {
                       className="flex items-center gap-3 text-s text-slate-700 group"
                     >
                       <div className="w-6 h-6 rounded-full bg-orange-50 flex items-center justify-center shrink-0 group-hover:bg-orange-100 transition-colors">
-                        <item.icon className="w-3.5 h-3.5 text-orange-500" />
+                        <item.icon className="w-5 h-5 text-orange-500" />
                       </div>
-                      {item.text}
+                      <p className="font-semibold">{item.text}</p>
                     </li>
                   ))}
                 </ul>
@@ -185,10 +185,10 @@ export default function Home() {
                 <CheckSquare className="w-6 h-6 text-emerald-600" />
               </div>
               <div>
-                <h4 className="text-lg font-bold text-slate-800">
+                <h4 className="text-2xl font-bold text-slate-800">
                   Submission CODE:
                 </h4>
-                <p className="text-slate-600 mt-1 text-s">
+                <p className="text-slate-600 mt-1 text-lg">
                   Generated after final submission and sent to your email and
                   mobile number immediately. Keep this safe.
                 </p>
@@ -202,11 +202,11 @@ export default function Home() {
           className="bg-red-50 border border-red-200 rounded-xl overflow-hidden"
         >
           <div className="p-6">
-            <h4 className="text-lg font-bold text-red-800 flex items-center gap-2 mb-4">
+            <h4 className="text-2xl font-bold text-red-800 flex items-center gap-2 mb-4">
               <ShieldAlert className="w-6 h-6" />
               IMPORTANT ADMISSION NOTICE
             </h4>
-            <ol className="list-decimal list-inside space-y-3 text-s text-red-900 font-medium">
+            <ol className="list-decimal list-inside space-y-3 text-lg text-red-900 font-medium">
               <li className="leading-relaxed">
                 Candidates must follow the University/Academy's code of conduct
                 and academic policies immediately after admission.
@@ -221,7 +221,7 @@ export default function Home() {
         </MotionSection>
 
         <div className="pt-8 text-center space-y-6">
-          <p className="text-s text-slate-500">
+          <p className="text-lg text-slate-500">
             By continuing, you agree to the terms above.
           </p>
           <Link
