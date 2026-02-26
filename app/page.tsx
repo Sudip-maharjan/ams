@@ -288,7 +288,7 @@ export default function Home() {
           </p>
           <Link
             href="/students"
-            className="inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-8 py-4 rounded-lg font-bold text-lg shadow-lg shadow-blue-200 transition-all active:scale-95"
+            className="inline-flex items-center gap-2 bg-blue-700 hover:bg-blue-800 text-white px-10 py-4 rounded-lg font-bold text-lg shadow-lg shadow-blue-200 transition-all active:scale-95"
           >
             Accept and Start Application
             <ArrowRight className="w-5 h-5" />
