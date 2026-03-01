@@ -1,7 +1,7 @@
 import Image from "next/image";
 const card = () => {
   return (
-    <div className="bg-white border-2 border-gray-300 h-100 w-75 absolute left-100">
+    <div className="bg-white border-2 border-gray-300 h-100 w-75 absolute left-50">
       <div className="relative h-60">
         <img
           src="/building.jpg"
