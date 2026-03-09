@@ -3,17 +3,15 @@
 
 // Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
 // Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
-
 generator client {
-  provider = "prisma-client"
+  provider = "prisma-client-js"
   output   = "../lib/generated/prisma"
 }
 
 datasource db {
   provider = "mongodb"
-  url = env("DATABASE_URL")
+  url      = env("DATABASE_URL")
 }
-
 
 enum ApplicationStatus {
   DRAFT
@@ -24,12 +22,14 @@ enum ApplicationStatus {
 }
 
 model StudentApplication {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  amsCode    String   @unique
-  fullName   String
-  dob        DateTime
-  gender     String
+  id        String            @id @default(auto()) @map("_id") @db.ObjectId
+  amsCode   String            @unique
+  fullName  String
+  dob       DateTime
+  gender    String
+  status    ApplicationStatus @default(SUBMITTED)
+  createdAt DateTime          @default(now())
 
-  status     ApplicationStatus @default(SUBMITTED)
-  createdAt  DateTime @default(now())
-} 
+  @@index([status])
+  @@index([createdAt])
+}

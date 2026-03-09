@@ -7,23 +7,46 @@ export default function StudentsPage() {
   const [dob, setDob] = useState("");
   const [gender, setGender] = useState("");
   const [amsCode, setAmsCode] = useState<string | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (formData: any) => {
-    const res = await fetch("/api/students", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(formData),
-    });
-
-    if (!res.ok) {
-      const json = await res.json().catch(() => null); // parse JSON if available
-      console.error("Server response:", json || "(empty)");
-      alert("Something went wrong. Check console.");
+  const handleSubmit = async () => {
+    // Client-side validation
+    if (!fullName || !dob || !gender) {
+      alert("Please fill in all fields.");
       return;
     }
 
-    const data = await res.json();
-    console.log("Student created:", data);
+    setLoading(true);
+    setAmsCode(null); // clear previous result
+
+    try {
+      const res = await fetch("/api/students", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ fullName, dob, gender }),
+      });
+
+      const json = await res.json().catch(() => null);
+
+      if (!res.ok) {
+        console.error("Server response:", json);
+        alert(json?.error || "Something went wrong. Check console.");
+        return;
+      }
+
+      console.log("Student created:", json);
+      setAmsCode(json.amsCode); // show the server-generated AMS code
+
+      // Reset form
+      setFullName("");
+      setDob("");
+      setGender("");
+    } catch (err) {
+      console.error("Network error:", err);
+      alert("Network error. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -51,16 +74,17 @@ export default function StudentsPage() {
           onChange={(e) => setGender(e.target.value)}
         >
           <option value="">Select Gender</option>
-          <option>Male</option>
-          <option>Female</option>
-          <option>Other</option>
+          <option value="MALE">Male</option>
+          <option value="FEMALE">Female</option>
+          <option value="OTHER">Other</option>
         </select>
 
         <button
           onClick={handleSubmit}
-          className="bg-green-600 text-white px-4 py-2 rounded w-full"
+          disabled={loading}
+          className="bg-green-600 text-white px-4 py-2 rounded w-full disabled:opacity-50"
         >
-          Submit Application
+          {loading ? "Submitting..." : "Submit Application"}
         </button>
 
         {amsCode && (
