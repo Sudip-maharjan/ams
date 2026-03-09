@@ -10,5 +10,26 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "mongodb"
+  url = env("DATABASE_URL")
 }
+
+
+enum ApplicationStatus {
+  DRAFT
+  SUBMITTED
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+}
+
+model StudentApplication {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  amsCode    String   @unique
+  fullName   String
+  dob        DateTime
+  gender     String
+
+  status     ApplicationStatus @default(SUBMITTED)
+  createdAt  DateTime @default(now())
+} 
