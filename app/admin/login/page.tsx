@@ -1,4 +1,5 @@
 "use client";
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { ShieldCheck, Eye, EyeOff, AlertCircle } from "lucide-react";
@@ -34,21 +35,29 @@ export default function AdminLogin() {
 
   return (
     <div className="min-h-screen bg-[#FAEBD7] flex items-center justify-center p-4">
+      <Link
+        href="/"
+        className="absolute top-4 left-4 text-blue-600 hover:underline text-s font-medium"
+      >
+        Home
+      </Link>
       <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center mb-4">
-            <ShinyLogo
-              src="/logo.svg"
-              width={400}
-              height={70}
-              alt="Tribhuvan University Logo"
-            />
+        <Link href="/">
+          <div className="text-center mb-8">
+            <div className="inline-flex items-center justify-center mb-4">
+              <ShinyLogo
+                src="/logo.svg"
+                width={400}
+                height={70}
+                alt="Tribhuvan University Logo"
+              />
+            </div>
+            <h1 className="text-2xl font-bold">Admin Portal</h1>
+            <p className="text-slate-400 mt-1 text-sm">
+              IOM Admission Management
+            </p>
           </div>
-          <h1 className="text-2xl font-bold">Admin Portal</h1>
-          <p className="text-slate-400 mt-1 text-sm">
-            IOM Admission Management
-          </p>
-        </div>
+        </Link>
 
         <div className="bg-white rounded-2xl p-8 shadow-2xl">
           {error && (
@@ -60,21 +69,21 @@ export default function AdminLogin() {
 
           <form onSubmit={handleLogin} className="space-y-5">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+              <label className="block text-md font-semibold text-slate-700 mb-1.5">
                 Username
               </label>
               <input
                 type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
-                className="w-full px-4 py-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                className="w-full px-4 py-3 border border-slate-200 rounded-lg text-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 placeholder="Enter username"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-1.5">
+              <label className="block text-md font-semibold text-slate-700 mb-1.5">
                 Password
               </label>
               <div className="relative">
@@ -82,7 +91,7 @@ export default function AdminLogin() {
                   type={showPassword ? "text" : "password"}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
-                  className="w-full px-4 py-3 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
+                  className="w-full px-4 py-3 border border-slate-200 rounded-lg text-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent pr-10"
                   placeholder="Enter password"
                   required
                 />
@@ -103,7 +112,7 @@ export default function AdminLogin() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-blue-700 hover:bg-blue-800 disabled:opacity-60 text-white py-3 rounded-lg font-semibold text-sm transition-colors"
+              className="w-full bg-blue-700 hover:bg-blue-800 disabled:opacity-60 text-white py-3 rounded-lg font-semibold text-md transition-colors"
             >
               {loading ? "Signing in..." : "Sign In"}
             </button>

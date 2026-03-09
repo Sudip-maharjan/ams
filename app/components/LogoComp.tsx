@@ -58,6 +58,7 @@ export default function ShinyLogo({
             src={src}
             alt={alt}
             width={width}
+            loading="eager"
             height={height}
           />
         </div>
