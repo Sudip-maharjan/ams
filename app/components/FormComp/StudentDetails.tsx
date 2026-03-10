@@ -1,33 +1,151 @@
-// import { BookOpen, HelpCircle } from "lucide-react";
-
-// export default function StudentDetails() {
-//   return (
-//     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-//       <div className="p-6"></div>
-//     </div>
-//   );
-// }
-
 "use client";
-
 import { useState } from "react";
+import { college_prog } from "@/lib/data/collegeandprog";
 
 const CATEGORIES = ["Open", "Scholarship", "Quota"];
-const PROGRAMS = ["MBBS", "BDS", "B.Sc Nursing", "BASLP", "B.Pharm"];
-const COLLEGES = [
-  "Institute of Medicine (IOM)",
-  "BP Koirala Institute",
-  "Manipal College of Medical Sciences",
-  "Kathmandu Medical College",
-  "Nobel Medical College",
-];
+const PROGRAM_COLLEGES: Record<string, string[]> = college_prog;
+const PROGRAMS = Object.keys(PROGRAM_COLLEGES);
 const GENDERS = ["Male", "Female", "Other"];
-const BLOOD_GROUPS = ["A+", "A−", "B+", "B−", "AB+", "AB−", "O+", "O−"];
+const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
 const NATIONALITY_DOCS = ["Citizenship", "Passport", "Birth Certificate"];
 const SALUTATIONS = ["Mr.", "Ms.", "Mrs.", "Dr."];
 
-export default function StudentDetails({ onSubmit }) {
-  const [form, setForm] = useState({
+type FormFields = {
+  category: string;
+  mecRollNumber: string;
+  mecRank: string;
+  mecScore: string;
+  program: string;
+  college: string;
+  salutation: string;
+  firstName: string;
+  middleName: string;
+  lastName: string;
+  firstNameNepali: string;
+  middleNameNepali: string;
+  lastNameNepali: string;
+  dobAD: string;
+  dobBS: string;
+  gender: string;
+  mobileNumber: string;
+  email: string;
+  bloodGroup: string;
+  nationalityDocType: string;
+};
+
+type StudentDetailsProps = {
+  onSubmit?: (form: FormFields) => void;
+};
+
+const Label = ({
+  children,
+  required,
+}: {
+  children: React.ReactNode;
+  required?: boolean;
+}) => (
+  <label className="block text-sm font-medium text-slate-700 mb-1.5">
+    {children}
+    {required && <span className="text-red-500 ml-1">*</span>}
+  </label>
+);
+
+const Input = ({
+  field,
+  placeholder,
+  type = "text",
+  className = "",
+  value,
+  error,
+  onChange,
+}: {
+  field: keyof FormFields;
+  placeholder: string;
+  type?: string;
+  className?: string;
+  value: string;
+  error?: string;
+  onChange: (
+    field: keyof FormFields,
+  ) => (e: React.ChangeEvent<HTMLInputElement>) => void;
+}) => (
+  <div className={className}>
+    <input
+      type={type}
+      value={value}
+      onChange={onChange(field)}
+      placeholder={placeholder}
+      className={`w-full px-3.5 py-2.5 rounded-lg border text-sm text-slate-800 placeholder-slate-400 bg-white transition-all outline-none ${
+        error
+          ? "border-red-400 ring-1 ring-red-300 focus:ring-red-400"
+          : "border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+      }`}
+    />
+    {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+  </div>
+);
+
+const Select = ({
+  field,
+  placeholder,
+  options,
+  className = "",
+  disabled = false,
+  value,
+  error,
+  onChange,
+}: {
+  field: keyof FormFields;
+  placeholder: string;
+  options: string[];
+  className?: string;
+  disabled?: boolean;
+  value: string;
+  error?: string;
+  onChange: (
+    field: keyof FormFields,
+  ) => (e: React.ChangeEvent<HTMLSelectElement>) => void;
+}) => (
+  <div className={className}>
+    <select
+      value={value}
+      onChange={onChange(field)}
+      disabled={disabled}
+      className={`w-full px-3.5 py-2.5 rounded-lg border text-sm bg-white transition-all outline-none appearance-none ${
+        disabled
+          ? "cursor-not-allowed opacity-50 bg-slate-50"
+          : "cursor-pointer"
+      } ${!value ? "text-slate-400" : "text-slate-800"} ${
+        error
+          ? "border-red-400 ring-1 ring-red-300 focus:ring-red-400"
+          : "border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+      }`}
+    >
+      <option value="" disabled>
+        {placeholder}
+      </option>
+      {options.map((o: string) => (
+        <option key={o} value={o} className="text-slate-800">
+          {o}
+        </option>
+      ))}
+    </select>
+    {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+  </div>
+);
+
+const Divider = ({ label }: { label: string }) => (
+  <div className="flex items-center gap-3 my-6">
+    <div className="h-px flex-1 bg-slate-100" />
+    <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+      {label}
+    </span>
+    <div className="h-px flex-1 bg-slate-100" />
+  </div>
+);
+
+export default function StudentDetails({ onSubmit }: StudentDetailsProps) {
+  const [form, setForm] = useState<FormFields>({
     category: "",
     mecRollNumber: "",
     mecRank: "",
@@ -50,9 +168,9 @@ export default function StudentDetails({ onSubmit }) {
     nationalityDocType: "",
   });
 
-  const [errors, setErrors] = useState({});
+  const [errors, setErrors] = useState<Partial<FormFields>>({});
 
-  const required = [
+  const required: (keyof FormFields)[] = [
     "category",
     "mecRollNumber",
     "mecRank",
@@ -71,13 +189,24 @@ export default function StudentDetails({ onSubmit }) {
     "nationalityDocType",
   ];
 
-  const handle = (field) => (e) => {
-    setForm((prev) => ({ ...prev, [field]: e.target.value }));
-    if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
-  };
+  const handle =
+    (field: keyof FormFields) =>
+    (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+      const value = e.target.value;
+      setForm((prev) => ({
+        ...prev,
+        [field]: value,
+        ...(field === "program" ? { college: "" } : {}),
+      }));
+      if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
+    };
 
-  const validate = () => {
-    const errs = {};
+  const availableColleges = form.program
+    ? (PROGRAM_COLLEGES[form.program] ?? [])
+    : [];
+
+  const validate = (): Partial<FormFields> => {
+    const errs: Partial<FormFields> = {};
     required.forEach((f) => {
       if (!form[f]) errs[f] = "This field is required";
     });
@@ -88,7 +217,7 @@ export default function StudentDetails({ onSubmit }) {
     return errs;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const errs = validate();
     if (Object.keys(errs).length > 0) {
@@ -98,76 +227,9 @@ export default function StudentDetails({ onSubmit }) {
     onSubmit?.(form);
   };
 
-  // Reusable field components
-  const Label = ({ children, required }) => (
-    <label className="block text-sm font-medium text-slate-700 mb-1.5">
-      {children}
-      {required && <span className="text-red-500 ml-1">*</span>}
-    </label>
-  );
-
-  const Input = ({ field, placeholder, type = "text", className = "" }) => (
-    <div className={className}>
-      <input
-        type={type}
-        value={form[field]}
-        onChange={handle(field)}
-        placeholder={placeholder}
-        className={`w-full px-3.5 py-2.5 rounded-lg border text-sm text-slate-800 placeholder-slate-400 bg-white transition-all outline-none
-          ${
-            errors[field]
-              ? "border-red-400 ring-1 ring-red-300 focus:ring-red-400"
-              : "border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-          }`}
-      />
-      {errors[field] && (
-        <p className="mt-1 text-xs text-red-500">{errors[field]}</p>
-      )}
-    </div>
-  );
-
-  const Select = ({ field, placeholder, options, className = "" }) => (
-    <div className={className}>
-      <select
-        value={form[field]}
-        onChange={handle(field)}
-        className={`w-full px-3.5 py-2.5 rounded-lg border text-sm bg-white transition-all outline-none appearance-none cursor-pointer
-          ${!form[field] ? "text-slate-400" : "text-slate-800"}
-          ${
-            errors[field]
-              ? "border-red-400 ring-1 ring-red-300 focus:ring-red-400"
-              : "border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-          }`}
-      >
-        <option value="" disabled>
-          {placeholder}
-        </option>
-        {options.map((o) => (
-          <option key={o} value={o} className="text-slate-800">
-            {o}
-          </option>
-        ))}
-      </select>
-      {errors[field] && (
-        <p className="mt-1 text-xs text-red-500">{errors[field]}</p>
-      )}
-    </div>
-  );
-
-  const Divider = ({ label }) => (
-    <div className="flex items-center gap-3 my-6">
-      <div className="h-px flex-1 bg-slate-100" />
-      <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-        {label}
-      </span>
-      <div className="h-px flex-1 bg-slate-100" />
-    </div>
-  );
-
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
       <div className="p-6">
-        {/* Header */}
         <div className="px-8 py-6 border-b border-slate-100 flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
             <svg
@@ -195,33 +257,53 @@ export default function StudentDetails({ onSubmit }) {
         </div>
 
         <form onSubmit={handleSubmit} className="px-8 py-7 space-y-5">
-          {/* Category */}
           <div>
             <Label required>Category</Label>
             <Select
               field="category"
               placeholder="Select Category"
               options={CATEGORIES}
+              value={form.category}
+              error={errors.category}
+              onChange={handle}
             />
           </div>
 
-          {/* MEC Row */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <Label required>MEC Roll Number</Label>
-              <Input field="mecRollNumber" placeholder="2024XXXX" />
+              <Input
+                field="mecRollNumber"
+                placeholder="2024XXXX"
+                value={form.mecRollNumber}
+                error={errors.mecRollNumber}
+                onChange={handle}
+              />
             </div>
             <div>
               <Label required>MEC Rank</Label>
-              <Input field="mecRank" placeholder="120" type="number" />
+              <Input
+                field="mecRank"
+                placeholder="120"
+                type="number"
+                value={form.mecRank}
+                error={errors.mecRank}
+                onChange={handle}
+              />
             </div>
             <div>
               <Label required>MEC Score</Label>
-              <Input field="mecScore" placeholder="100" type="number" />
+              <Input
+                field="mecScore"
+                placeholder="100"
+                type="number"
+                value={form.mecScore}
+                error={errors.mecScore}
+                onChange={handle}
+              />
             </div>
           </div>
 
-          {/* Program & College */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
               <Label required>Program</Label>
@@ -229,21 +311,36 @@ export default function StudentDetails({ onSubmit }) {
                 field="program"
                 placeholder="Select program"
                 options={PROGRAMS}
+                value={form.program}
+                error={errors.program}
+                onChange={handle}
               />
             </div>
             <div>
               <Label required>College</Label>
               <Select
                 field="college"
-                placeholder="Select college"
-                options={COLLEGES}
+                placeholder={
+                  form.program ? "Select college" : "Select a program first"
+                }
+                options={availableColleges}
+                disabled={!form.program}
+                value={form.college}
+                error={errors.college}
+                onChange={handle}
               />
+              {form.program && availableColleges.length > 0 && (
+                <p className="mt-1 text-xs text-slate-400">
+                  {availableColleges.length} college
+                  {availableColleges.length !== 1 ? "s" : ""} available for{" "}
+                  {form.program}
+                </p>
+              )}
             </div>
           </div>
 
           <Divider label="Personal Information" />
 
-          {/* Name Row */}
           <div>
             <Label required>Name</Label>
             <div className="grid grid-cols-[130px_1fr_1fr] gap-3">
@@ -251,17 +348,37 @@ export default function StudentDetails({ onSubmit }) {
                 field="salutation"
                 placeholder="Select"
                 options={SALUTATIONS}
+                value={form.salutation}
+                error={errors.salutation}
+                onChange={handle}
               />
-              <Input field="firstName" placeholder="First name" />
-              <Input field="middleName" placeholder="Middle name" />
+              <Input
+                field="firstName"
+                placeholder="First name"
+                value={form.firstName}
+                error={errors.firstName}
+                onChange={handle}
+              />
+              <Input
+                field="middleName"
+                placeholder="Middle name"
+                value={form.middleName}
+                error={errors.middleName}
+                onChange={handle}
+              />
             </div>
           </div>
           <div>
             <Label required>Last Name</Label>
-            <Input field="lastName" placeholder="Last name" />
+            <Input
+              field="lastName"
+              placeholder="Last name"
+              value={form.lastName}
+              error={errors.lastName}
+              onChange={handle}
+            />
           </div>
 
-          {/* Nepali Names */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <Label required>
@@ -273,27 +390,57 @@ export default function StudentDetails({ onSubmit }) {
                   ?
                 </span>
               </Label>
-              <Input field="firstNameNepali" placeholder="पहिलो नाम" />
+              <Input
+                field="firstNameNepali"
+                placeholder="पहिलो नाम"
+                value={form.firstNameNepali}
+                error={errors.firstNameNepali}
+                onChange={handle}
+              />
             </div>
             <div>
               <Label>Middle Name (Nepali)</Label>
-              <Input field="middleNameNepali" placeholder="बीचको नाम" />
+              <Input
+                field="middleNameNepali"
+                placeholder="बीचको नाम"
+                value={form.middleNameNepali}
+                error={errors.middleNameNepali}
+                onChange={handle}
+              />
             </div>
             <div>
               <Label required>Last Name (Nepali)</Label>
-              <Input field="lastNameNepali" placeholder="थर" />
+              <Input
+                field="lastNameNepali"
+                placeholder="थर"
+                value={form.lastNameNepali}
+                error={errors.lastNameNepali}
+                onChange={handle}
+              />
             </div>
           </div>
 
-          {/* DOB, Gender */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <Label required>Date of Birth (AD)</Label>
-              <Input field="dobAD" placeholder="YYYY-MM-DD" type="date" />
+              <Input
+                field="dobAD"
+                placeholder="YYYY-MM-DD"
+                type="date"
+                value={form.dobAD}
+                error={errors.dobAD}
+                onChange={handle}
+              />
             </div>
             <div>
               <Label>Date of Birth (BS)</Label>
-              <Input field="dobBS" placeholder="YYYY-MM-DD" />
+              <Input
+                field="dobBS"
+                placeholder="YYYY-MM-DD"
+                value={form.dobBS}
+                error={errors.dobBS}
+                onChange={handle}
+              />
             </div>
             <div>
               <Label required>Gender</Label>
@@ -301,15 +448,24 @@ export default function StudentDetails({ onSubmit }) {
                 field="gender"
                 placeholder="Select Gender"
                 options={GENDERS}
+                value={form.gender}
+                error={errors.gender}
+                onChange={handle}
               />
             </div>
           </div>
 
-          {/* Contact */}
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div>
               <Label required>Mobile Number (Nepali)</Label>
-              <Input field="mobileNumber" placeholder="98XXXXXXXX" type="tel" />
+              <Input
+                field="mobileNumber"
+                placeholder="98XXXXXXXX"
+                type="tel"
+                value={form.mobileNumber}
+                error={errors.mobileNumber}
+                onChange={handle}
+              />
             </div>
             <div>
               <Label required>Email</Label>
@@ -317,6 +473,9 @@ export default function StudentDetails({ onSubmit }) {
                 field="email"
                 placeholder="example@example.com"
                 type="email"
+                value={form.email}
+                error={errors.email}
+                onChange={handle}
               />
             </div>
             <div>
@@ -325,27 +484,33 @@ export default function StudentDetails({ onSubmit }) {
                 field="bloodGroup"
                 placeholder="Select Blood Group"
                 options={BLOOD_GROUPS}
+                value={form.bloodGroup}
+                error={errors.bloodGroup}
+                onChange={handle}
               />
             </div>
           </div>
 
-          {/* Nationality Doc */}
           <div className="max-w-xs">
             <Label required>Nationality Document Type</Label>
             <Select
               field="nationalityDocType"
               placeholder="Select Nationality Document Type"
               options={NATIONALITY_DOCS}
+              value={form.nationalityDocType}
+              error={errors.nationalityDocType}
+              onChange={handle}
             />
           </div>
 
-          {/* Submit */}
           <div className="pt-4 border-t border-slate-100 flex justify-end gap-3">
             <button
               type="button"
               onClick={() => {
                 setForm(
-                  Object.fromEntries(Object.keys(form).map((k) => [k, ""])),
+                  Object.fromEntries(
+                    Object.keys(form).map((k) => [k, ""]),
+                  ) as FormFields,
                 );
                 setErrors({});
               }}
