@@ -190,7 +190,3 @@ npx prisma studio  # Open Prisma database GUI
 - After any schema change, run `npx prisma generate` followed by `npm run dev` with a cleared `.next` cache.
 
 ---
-
-## License
-
-This project is private and maintained by Sudip Maharjan.
