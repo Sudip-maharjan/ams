@@ -35,6 +35,7 @@ type FormFields = {
 
 type StudentDetailsProps = {
   onSubmit?: (form: FormFields) => void;
+  isLoading?: boolean;
 };
 
 const Label = ({
@@ -144,7 +145,10 @@ const Divider = ({ label }: { label: string }) => (
   </div>
 );
 
-export default function StudentDetails({ onSubmit }: StudentDetailsProps) {
+export default function StudentDetails({
+  onSubmit,
+  isLoading = false,
+}: StudentDetailsProps) {
   const [form, setForm] = useState<FormFields>({
     category: "",
     mecRollNumber: "",
@@ -520,9 +524,10 @@ export default function StudentDetails({ onSubmit }: StudentDetailsProps) {
             </button>
             <button
               type="submit"
-              className="px-6 py-2.5 rounded-lg text-sm font-semibold text-white bg-blue-500 hover:bg-blue-600 active:bg-blue-700 transition-colors shadow-sm shadow-blue-200"
+              disabled={isLoading}
+              className="px-6 py-2.5 rounded-lg text-sm font-semibold text-white bg-blue-500 hover:bg-blue-600 active:bg-blue-700 transition-colors shadow-sm shadow-blue-200 disabled:opacity-60 disabled:cursor-not-allowed"
             >
-              Save & Continue
+              {isLoading ? "Submitting…" : "Save & Continue"}
             </button>
           </div>
         </form>

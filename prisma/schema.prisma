@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
-// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
 generator client {
   provider = "prisma-client-js"
   output   = "../lib/generated/prisma"
@@ -24,12 +19,36 @@ enum ApplicationStatus {
 model StudentApplication {
   id        String            @id @default(auto()) @map("_id") @db.ObjectId
   amsCode   String            @unique
-  fullName  String
-  dob       DateTime
-  gender    String
   status    ApplicationStatus @default(SUBMITTED)
   createdAt DateTime          @default(now())
 
+  category      String
+  mecRollNumber String
+  mecRank       Int
+  mecScore      Float
+  program       String
+  college       String
+
+  salutation  String
+  firstName   String
+  middleName  String?
+  lastName    String
+
+  firstNameNepali  String
+  middleNameNepali String?
+  lastNameNepali   String
+
+  dobAD DateTime
+  dobBS String?
+
+  gender             String
+  mobileNumber       String
+  email              String
+  bloodGroup         String?
+  nationalityDocType String
+
   @@index([status])
   @@index([createdAt])
+  @@index([program])
+  @@index([college])
 }
