@@ -2,28 +2,22 @@
 import { useState, useImperativeHandle, forwardRef } from "react";
 import { college_prog } from "@/lib/data/collegeandprog";
 import "./studentDetails.css";
-
-const CATEGORIES = ["Paying", "Foreign", "Scholarship", "Army Funded"];
-const SCHOLARSHIP_SUBCATEGORIES = [
-  "Open",
-  "Female Reservation",
-  "Dalit Female Reservation",
-  "Muslim Female",
-  "Dalit",
-  "Adibasi Janajati",
-  "Khasarya",
-  "Madhesi",
-  "Madhesi Dalit",
-  "Tharu",
-  "Muslim",
-];
-const FOREIGN_SUBCATEGORIES = ["MECEE-BL", "NEET", "MECEE-PG"];
-const PROGRAM_COLLEGES: Record<string, string[]> = college_prog;
-const PROGRAMS = Object.keys(PROGRAM_COLLEGES);
-const GENDERS = ["Male", "Female", "Other"];
-const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
-const NATIONALITY_DOCS = ["Citizenship", "Passport", "Birth Certificate"];
-const SALUTATIONS = ["Mr.", "Ms.", "Mrs.", "Dr."];
+import {
+  validate,
+  convertADtoBS,
+  convertBStoAD,
+} from "./StudentDetailsValidate";
+import {
+  PROGRAM_COLLEGES,
+  CATEGORIES,
+  FOREIGN_SUBCATEGORIES,
+  SCHOLARSHIP_SUBCATEGORIES,
+  PROGRAMS,
+  SALUTATIONS,
+  GENDERS,
+  BLOOD_GROUPS,
+  NATIONALITY_DOCS,
+} from "@/lib/data/collegeandprog";
 
 export type FormFields = {
   category: string;
@@ -49,11 +43,8 @@ export type FormFields = {
   nationalityDocType: string;
 };
 
-// Ref handle — FormLayout calls these imperatively
 export type StudentDetailsHandle = {
-  /** Validates and returns form data on success, or null if invalid */
   validate: () => FormFields | null;
-  /** Resets the form to empty state */
   reset: () => void;
 };
 
@@ -142,6 +133,7 @@ const Input = ({
       value={value}
       onChange={onChange(field)}
       onKeyDown={onKeyDown}
+      inputMode={inputMode}
       placeholder={placeholder}
       className={`w-full px-3.5 py-2.5 rounded-lg border text-sm text-slate-800 placeholder-slate-400 bg-white transition-all outline-none ${
         error
@@ -217,47 +209,11 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
     const [form, setForm] = useState<FormFields>(emptyForm());
     const [errors, setErrors] = useState<Partial<FormFields>>({});
 
-    const requiredFields = (f: FormFields): (keyof FormFields)[] => [
-      "category",
-      ...(f.category === "Scholarship" || f.category === "Foreign"
-        ? (["subCategory"] as (keyof FormFields)[])
-        : []),
-      "mecRollNumber",
-      "mecRank",
-      "mecScore",
-      "program",
-      "college",
-      "salutation",
-      "firstName",
-      "lastName",
-      "firstNameNepali",
-      "lastNameNepali",
-      "dobAD",
-      "gender",
-      "mobileNumber",
-      "email",
-      "nationalityDocType",
-    ];
-
-    const validate = (f: FormFields): Partial<FormFields> => {
-      const errs: Partial<FormFields> = {};
-      requiredFields(f).forEach((field) => {
-        if (!f[field]) errs[field] = "This field is required";
-      });
-      if (f.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(f.email))
-        errs.email = "Enter a valid email";
-      if (f.mobileNumber && !/^\d{10}$/.test(f.mobileNumber))
-        errs.mobileNumber = "Enter a valid 10-digit number";
-      return errs;
-    };
-
-    // Expose validate() and reset() to FormLayout via ref
     useImperativeHandle(ref, () => ({
       validate: () => {
         const errs = validate(form);
         if (Object.keys(errs).length > 0) {
           setErrors(errs);
-          // Scroll to first error
           setTimeout(() => {
             document
               .querySelector("[data-student-details]")
@@ -278,12 +234,23 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
       (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
         const value = e.target.value;
         setForm((prev) => {
-          const next = {
+          let next = {
             ...prev,
             [field]: value,
             ...(field === "program" ? { college: "" } : {}),
             ...(field === "category" ? { subCategory: "" } : {}),
           };
+
+          if (field === "dobAD" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+            const bs = convertADtoBS(value);
+            if (bs) next = { ...next, dobBS: bs };
+          }
+
+          if (field === "dobBS" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+            const ad = convertBStoAD(value);
+            if (ad) next = { ...next, dobAD: ad };
+          }
+
           onChange?.(next);
           return next;
         });

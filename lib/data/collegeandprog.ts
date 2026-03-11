@@ -101,3 +101,30 @@ export const college_prog = {
   ],
   BMS: ["Maharajgunj Nursing Campus (MNC)"],
 };
+
+export const CATEGORIES = ["Paying", "Foreign", "Scholarship", "Army Funded"];
+export const SCHOLARSHIP_SUBCATEGORIES = [
+  "Open",
+  "Female Reservation",
+  "Dalit Female Reservation",
+  "Muslim Female",
+  "Dalit",
+  "Adibasi Janajati",
+  "Khasarya",
+  "Madhesi",
+  "Madhesi Dalit",
+  "Tharu",
+  "Muslim",
+];
+export const FOREIGN_SUBCATEGORIES = ["MECEE-BL", "NEET", "MECEE-PG"];
+export const PROGRAM_COLLEGES: Record<string, string[]> = college_prog;
+export const PROGRAMS = Object.keys(PROGRAM_COLLEGES);
+export const GENDERS = ["Male", "Female", "Other"];
+export const BLOOD_GROUPS = ["A+", "A-", "B+", "B-", "AB+", "AB-", "O+", "O-"];
+export const NATIONALITY_DOCS = [
+  "Citizenship (नागरिकता)",
+  "National ID (राष्ट्रिय परिचयपत्र)",
+  "Passport (राहदानी)",
+  "Aadhaar Card (आधार कार्ड)",
+];
+export const SALUTATIONS = ["Mr.", "Ms.", "Mrs.", "Dr."];
