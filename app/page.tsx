@@ -106,7 +106,7 @@ export default function Home() {
 
             <div className="grid md:grid-cols-2 gap-8 mt-8">
               <div>
-                <h5 className="text-s font-bold text-slate-400 uppercase tracking-widest mb-4">
+                <h5 className="text-lg font-bold text-slate-600 uppercase tracking-widest mb-4">
                   Mandatory Documents
                 </h5>
                 <ul className="space-y-3">
@@ -124,7 +124,7 @@ export default function Home() {
                 </ul>
               </div>
               <div>
-                <h5 className="text-s font-bold text-slate-400 uppercase tracking-widest mb-4">
+                <h5 className="text-lg font-bold text-slate-600 uppercase tracking-widest mb-4">
                   Conditional Documents
                 </h5>
                 <ul className="space-y-3">

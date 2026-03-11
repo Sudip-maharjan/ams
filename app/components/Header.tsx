@@ -31,7 +31,7 @@ export default function Header() {
           <h3 className="text-2xl font-bold text-slate-800">
             IOM Bachelor Program Online Admission 2082/2025
           </h3>
-          <div className="inline-block bg-blue-50 text-blue-700 px-4 py-1 rounded-full text-s font-medium border border-blue-100">
+          <div className="inline-block bg-blue-50 shadow-sm text-black-900 px-4 py-1 rounded-full text-lg font-medium border border-blue-100">
             Admission Application Form
           </div>
         </div>
