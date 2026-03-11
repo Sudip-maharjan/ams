@@ -1,4 +1,4 @@
-# AMS — Admission Management System (development phase)
+# AMS — Admission Management System
 
 A full-stack web application for managing student admissions for the **IOM (Institute of Medicine) Bachelor Program** under Tribhuvan University. Built with Next.js 16, Prisma, and MongoDB.
 
@@ -7,7 +7,12 @@ A full-stack web application for managing student admissions for the **IOM (Inst
 ## Features
 
 - **Landing page** with document requirements, mandatory/conditional document lists, and admission notices
-- **Multi-field student application form** with client-side validation (English & Nepali name fields, MEC details, program/college selection, DOB in AD & BS, etc.)
+- **Multi-field student application form** with client-side validation (English & Nepali name fields, MEC details, program/college selection, DOB in AD & BS with auto-conversion, etc.)
+- **Category & subcategory support** — Open, Foreign, and Scholarship categories with subcategory selection
+- **DOB auto-conversion** — entering a complete date in AD auto-fills BS (and vice versa), with format and range validation
+- **Modular form architecture** — `FormLayout` orchestrates `StudentDetails` and `Address` components via `forwardRef`, each exposing `validate()` and `reset()` methods
+- **`FormActions` component** — dedicated Reset/Submit buttons with loading state
+- **Success page** — displays the generated AMS code after successful submission
 - **Server-side AMS code generation** — unique submission code generated on the server and returned after successful submission
 - **Admin section** with login/logout routes
 - **MongoDB** backend via Prisma ORM with a custom output path
@@ -38,12 +43,13 @@ ams/
 │   │   ├── admin/         # Login & logout API routes
 │   │   └── students/      # Student application POST endpoint
 │   ├── components/
-│   │   ├── FormComp/      # FormLayout, StudentDetails
+│   │   ├── FormComp/      # FormLayout, StudentDetails, Address, FormActions
 │   │   └── Header.tsx
 │   ├── students/          # Student application form page
+│   ├── success/           # Success page — displays AMS code from URL search param
 │   └── page.tsx           # Landing page
 ├── lib/
-│   ├── data/              # Static data (colleges, programs, requirements)
+│   ├── data/              # Static data (colleges, programs, categories, requirements)
 │   ├── generated/prisma/  # Auto-generated Prisma client
 │   └── prisma.ts          # Prisma client singleton
 └── prisma/
@@ -187,6 +193,6 @@ npx prisma studio  # Open Prisma database GUI
 
 - The `amsCode` is always generated server-side and cannot be set by the client.
 - The `status` field defaults to `SUBMITTED` and is always hardcoded on creation.
+- DOB conversion helpers (`convertADtoBS`, `convertBStoAD`) and constants (`CATEGORIES`, `PROGRAMS`, `GENDERS`, `SALUTATIONS`) are colocated in `@/lib/data/` for reuse across components.
+- `StudentDetails` and `Address` use `forwardRef` — `FormLayout` calls `validate()` on both before submitting and `reset()` on both when Reset is clicked.
 - After any schema change, run `npx prisma generate` followed by `npm run dev` with a cleared `.next` cache.
-
----

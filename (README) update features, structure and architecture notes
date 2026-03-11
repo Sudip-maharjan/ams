@@ -1,0 +1,180 @@
+[33mcommit 8f328cc75ebc6a46d1a63b4160c455f2a21e942a[m[33m ([m[1;36mHEAD[m[33m -> [m[1;32mmain[m[33m, [m[1;31morigin/main[m[33m, [m[1;31morigin/HEAD[m[33m)[m
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Wed Mar 11 15:34:02 2026 +0545
+
+    style(Address): tweak border and shadow on address divs
+
+[33mcommit 15599113113bdd403b4f6977a39c2f8fd97a2fa0[m
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Wed Mar 11 15:26:32 2026 +0545
+
+    feat(StudentDetails): add AD↔BS auto-conversion and extract validation
+    
+    Install nepali-date-converter for BS/AD date conversion.
+    
+    - Add studentValidation.ts with validate(), requiredFields(),
+      convertADtoBS(), convertBStoAD() extracted from StudentDetails
+    - Add DOB validation with format and range checks for both AD and BS
+    - Auto-convert dobAD→dobBS and dobBS→dobAD on complete YYYY-MM-DD input
+    - Move CATEGORIES, PROGRAMS, GENDERS, SALUTATIONS etc. to @/lib/data/collegeandprog
+    - Import validation helpers and constants from their new modules
+
+[33mcommit 91e560c241f2d3d2f558f4cacf1254611b50b857[m
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Wed Mar 11 14:45:46 2026 +0545
+
+    refactor(StudentDetails): extract reusable onKeyDown handlers
+    
+    Add numericOnly and noNumbers constants to avoid repeating
+    inline onKeyDown logic across fields:
+    
+    - Replace inline onKeyDown on MEC fields with numericOnly
+    - Add noNumbers to firstName, middleName, lastName fields
+
+[33mcommit 7e9b58b63562bfaddd0df1bd2ac55dae31b5fabe[m
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Wed Mar 11 14:15:19 2026 +0545
+
+    feat(form): lift form state and add FormActions component
+    
+    Refactor form architecture to separate concerns:
+    
+    - Add FormActions.tsx with Reset/Submit buttons (onReset, onSubmit, isLoading props)
+    - Refactor StudentDetails with forwardRef, expose validate() and reset() via ref handle
+    - Refactor Address with forwardRef, expose validate() and reset() via ref handle
+    - Lift submission logic to FormLayout as single orchestrator
+    - Add /app/success/page.tsx to display AMS code via URL search param
+    
+    FormLayout now calls validate() on both refs before submitting,
+    and reset() on both when Reset is clicked
+
+[33mcommit daa2a246c40d73212e2e5e4a362630bef42270e2[m
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Wed Mar 11 13:56:57 2026 +0545
+
+    fix(StudentDetails): make Name fields responsive on mobile
+    
+    Fix compressed Name fields (Salutation, First Name, Middle Name) on
+    small screens by replacing fixed grid layout with a responsive one
+    that stacks fields vertically on mobile viewports
+
+[33mcommit 67273b066b24e584b289d90293a4dd4b1805d50d[m
+Author: Sudip-maharjan <maharjansudip2060@gmail.com>
+Date:   Wed Mar 11 10:22:35 2026 +0545
+
+    feat: added subcategory to categories foreign and scholarship
+
+[33mcommit 08012bd42fd3f867b079d6c8bb6efcf3c60e19c7[m
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Tue Mar 10 15:32:03 2026 +0545
+
+    docs: update readme
+
+[33mcommit 99a029aa326fb92f54111f8cd4b22daa8ce40972[m
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Tue Mar 10 15:26:54 2026 +0545
+
+    docs: add README with setup instructions, API reference, and data model
+
+[33mcommit 3e14908798be3a81ed6017c9b53c1568fec76bf4[m
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Tue Mar 10 15:16:20 2026 +0545
+
+    feat: updated schema for personal details
+
+[33mcommit a7569d336c288417f85e4a6194c9600658c87f11[m
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Tue Mar 10 13:17:31 2026 +0545
+
+    feat: added student form fields
+
+[33mcommit 2dbeed522154e8fd7a5057b87ca3cb2d8d4d98ec[m
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Mon Mar 9 15:52:59 2026 +0545
+
+    feat(components): StudentDetails component complete
+
+[33mcommit 2ac81caf5127555045e06298b2f54e708881200a[m
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Mon Mar 9 15:46:34 2026 +0545
+
+    feat: Application form init
+
+[33mcommit a996aeebebde8c6f1b46a903649923cb5920f14c[m
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Mon Mar 9 14:09:36 2026 +0545
+
+    feat: Added Header
+
+[33mcommit 485843e795d6bdc32c616714f90bec43e01184c6[m
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Mon Mar 9 12:52:52 2026 +0545
+
+    feat: Completed prisma setup
+
+[33mcommit 1bc4c4ab04e6bd62908e03a8f65365a23f52e30b[m
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Mon Mar 9 12:27:40 2026 +0545
+
+    feat: prisma added
+
+[33mcommit b1b45df237b3e56993643b2f7ce11fd1506db062[m
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Sun Mar 1 14:29:20 2026 +0545
+
+    prisma setup
+
+[33mcommit 99b0c95b889defdaeaca86c1f80af8459c0b8ff1[m
+Merge: e1b87c9 fe1f64e
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Fri Feb 27 16:38:28 2026 +0545
+
+    Merge branch 'main' of https://github.com/Sudip-maharjan/ams
+
+[33mcommit e1b87c96c0ea8c7afe7aebe51bbf09ffdab8b7c0[m
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Fri Feb 27 16:36:23 2026 +0545
+
+    some tests
+
+[33mcommit fe1f64edc3094a1844c270028a5c59cab36c5d47[m
+Author: Sudip-maharjan <maharjansudip2060@gmail.com>
+Date:   Thu Feb 26 22:45:06 2026 +0545
+
+    increased readability
+
+[33mcommit 1ef2bd3f1e60aebd696dc3784311d327b5e0e8cd[m
+Author: Sudip-maharjan <maharjansudip2060@gmail.com>
+Date:   Thu Feb 26 22:30:52 2026 +0545
+
+    dynamic requirements in landing page
+
+[33mcommit d8e12decdd2d45baee561725d9d47a4ae93589bc[m
+Author: Sudip-maharjan <maharjansudip2060@gmail.com>
+Date:   Thu Feb 26 21:49:36 2026 +0545
+
+    middleware renamed proxy
+
+[33mcommit 6f6a33457a4a6c9007874d84b08c1e6cdcc2219d[m
+Author: Sudip-maharjan <maharjansudip2060@gmail.com>
+Date:   Thu Feb 26 21:43:42 2026 +0545
+
+    middleware renamed proxy
+
+[33mcommit 0822fcf77f87f78f3a97e01d5e7e43108d1d7c32[m
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Thu Feb 26 13:04:49 2026 +0545
+
+    logout route error fixed
+
+[33mcommit c140addc80a4030056b510cc5c0f6f0076c09829[m
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Thu Feb 26 12:54:07 2026 +0545
+
+    page routing
+
+[33mcommit 2bd1fb896d268d9f56a201522d4e116b1fb876e8[m
+Author: Sudip Maharjan <maharjansudip2060@gmail.com>
+Date:   Wed Feb 25 12:24:27 2026 +0545
+
+    Initial commit from Create Next App
