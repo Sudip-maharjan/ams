@@ -462,7 +462,7 @@ const Address = forwardRef<AddressHandle, AddressProps>(function Address(
   }, [address]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden">
       <div className="px-8 py-6 border-b border-slate-100 flex items-center gap-4">
         <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
           <svg
@@ -494,7 +494,7 @@ const Address = forwardRef<AddressHandle, AddressProps>(function Address(
 
       <div className="px-8 py-7 space-y-6">
         {/* Permanent Address */}
-        <div className="border border-slate-100 rounded-xl p-5 space-y-4">
+        <div className="border border-slate-200 shadow-sm rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-semibold text-slate-700">
             Permanent Address
           </h3>
@@ -520,7 +520,7 @@ const Address = forwardRef<AddressHandle, AddressProps>(function Address(
         </label>
 
         {/* Temporary Address */}
-        <div className="border border-slate-100 rounded-xl p-5 space-y-4">
+        <div className="border border-slate-200 shadow-sm rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-semibold text-slate-700">
             Temporary Address
           </h3>
