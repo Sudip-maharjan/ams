@@ -2,6 +2,7 @@
 import { useState } from "react";
 import Header from "../Header";
 import StudentDetails from "./StudentDetails";
+import Address, { AddressFields } from "./StudemtAddress";
 
 type SubmissionState =
   | { status: "idle" }
@@ -13,6 +14,7 @@ export default function FormLayout() {
   const [submission, setSubmission] = useState<SubmissionState>({
     status: "idle",
   });
+  const [addressData, setAddressData] = useState<AddressFields | null>(null);
 
   const handleSubmit = async (formData: Record<string, string>) => {
     setSubmission({ status: "loading" });
@@ -21,7 +23,7 @@ export default function FormLayout() {
       const res = await fetch("/api/students", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(formData),
+        body: JSON.stringify({ ...formData, address: addressData }),
       });
 
       const json = await res.json().catch(() => null);
@@ -46,7 +48,7 @@ export default function FormLayout() {
   return (
     <div className="min-h-screen font-sans pb-20">
       <Header />
-      <main className="max-w-5xl mx-auto px-4 mt-3 space-y-6">
+      <main className="max-w-4xl mx-auto px-2 mt-2 space-y-6">
         {submission.status === "success" ? (
           <div className="bg-white rounded-xl border border-emerald-200 shadow-sm overflow-hidden">
             <div className="p-10 flex flex-col items-center text-center gap-4">
@@ -96,6 +98,7 @@ export default function FormLayout() {
               onSubmit={handleSubmit}
               isLoading={submission.status === "loading"}
             />
+            <Address onChange={setAddressData} />
           </>
         )}
       </main>

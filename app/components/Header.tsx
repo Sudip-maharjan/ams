@@ -4,20 +4,25 @@ import Link from "next/link";
 export default function Header() {
   return (
     <header className="bg-white border-b border-slate-200 py-6 px-4">
-      <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
-        <Image
-          src="/logo.svg"
-          loading="eager"
-          width={286}
-          height={48}
-          alt="Tribhuvan University Logo"
-        />
+      <div className="p-2">
         <Link
           href="/admin"
           className="absolute top-4 right-4 text-blue-600 hover:underline text-s font-medium"
         >
           admin
         </Link>
+      </div>
+      <div className="max-w-4xl mx-auto flex flex-col items-center text-center">
+        <Link href="/">
+          <Image
+            src="/logo.svg"
+            loading="eager"
+            width={286}
+            height={48}
+            alt="Tribhuvan University Logo"
+          />
+        </Link>
+
         <h2 className="mt-2 text-s font-semibold text-red-700 tracking-wider uppercase">
           Tribhuvan University
         </h2>

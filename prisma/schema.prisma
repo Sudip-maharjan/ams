@@ -16,6 +16,16 @@ enum ApplicationStatus {
   REJECTED
 }
 
+// Embedded address block — stored inline inside StudentApplication (no separate collection)
+type AddressBlock {
+  country      String
+  province     String
+  district     String
+  municipality String
+  wardNumber   String
+  locality     String
+}
+
 model StudentApplication {
   id        String            @id @default(auto()) @map("_id") @db.ObjectId
   amsCode   String            @unique
@@ -23,17 +33,17 @@ model StudentApplication {
   createdAt DateTime          @default(now())
 
   category      String
-  subCategory   String
+  subCategory   String?
   mecRollNumber String
   mecRank       Int
   mecScore      Float
   program       String
   college       String
 
-  salutation  String
-  firstName   String
-  middleName  String?
-  lastName    String
+  salutation String
+  firstName  String
+  middleName String?
+  lastName   String
 
   firstNameNepali  String
   middleNameNepali String?
@@ -47,6 +57,10 @@ model StudentApplication {
   email              String
   bloodGroup         String?
   nationalityDocType String
+
+  // Address — both blocks are required; stored as embedded BSON objects
+  permanentAddress AddressBlock
+  temporaryAddress AddressBlock
 
   @@index([status])
   @@index([createdAt])

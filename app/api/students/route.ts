@@ -2,11 +2,43 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
 import { randomBytes } from "crypto";
 
+// Shape of a single address block sent from the client (matches AddressFields in StudemtAddress.tsx)
+type AddressBlock = {
+  country: string;
+  province: string;
+  district: string;
+  municipality: string;
+  wardNumber: string;
+  locality: string;
+};
+
+type AddressPayload = {
+  permanent: AddressBlock;
+  temporary: AddressBlock;
+  sameAsPermanent: boolean;
+};
+
+const ADDRESS_BLOCK_FIELDS: (keyof AddressBlock)[] = [
+  "country",
+  "province",
+  "district",
+  "municipality",
+  "wardNumber",
+  "locality",
+];
+
+/** Returns an array of missing field names within an address block, prefixed with the block label. */
+function validateAddressBlock(block: AddressBlock, label: string): string[] {
+  return ADDRESS_BLOCK_FIELDS.filter((f) => !block?.[f]).map(
+    (f) => `${label}.${f}`,
+  );
+}
+
 export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // --- Required field validation ---
+    // --- Required scalar field validation ---
     const requiredFields = [
       "category",
       "mecRollNumber",
@@ -27,6 +59,15 @@ export async function POST(req: NextRequest) {
     ] as const;
 
     const missing = requiredFields.filter((f) => !body[f]);
+
+    // Subcategory is required only for Scholarship and Foreign categories
+    if (
+      (body.category === "Scholarship" || body.category === "Foreign") &&
+      !body.subCategory
+    ) {
+      missing.push("subCategory" as never);
+    }
+
     if (missing.length > 0) {
       return NextResponse.json(
         { error: `Missing required fields: ${missing.join(", ")}` },
@@ -34,7 +75,29 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // --- Type coercions & validation ---
+    // --- Address validation ---
+    const address: AddressPayload | undefined = body.address;
+
+    if (!address || !address.permanent || !address.temporary) {
+      return NextResponse.json(
+        { error: "Both permanent and temporary address are required" },
+        { status: 400 },
+      );
+    }
+
+    const addressErrors = [
+      ...validateAddressBlock(address.permanent, "permanentAddress"),
+      ...validateAddressBlock(address.temporary, "temporaryAddress"),
+    ];
+
+    if (addressErrors.length > 0) {
+      return NextResponse.json(
+        { error: `Missing address fields: ${addressErrors.join(", ")}` },
+        { status: 400 },
+      );
+    }
+
+    // --- Type coercions & format validation ---
     const dobAD = new Date(body.dobAD);
     if (isNaN(dobAD.getTime())) {
       return NextResponse.json(
@@ -100,6 +163,24 @@ export async function POST(req: NextRequest) {
         email: body.email,
         bloodGroup: body.bloodGroup || null,
         nationalityDocType: body.nationalityDocType,
+
+        // Embedded address objects — Prisma maps these to nested BSON documents
+        permanentAddress: {
+          country: address.permanent.country,
+          province: address.permanent.province,
+          district: address.permanent.district,
+          municipality: address.permanent.municipality,
+          wardNumber: address.permanent.wardNumber,
+          locality: address.permanent.locality,
+        },
+        temporaryAddress: {
+          country: address.temporary.country,
+          province: address.temporary.province,
+          district: address.temporary.district,
+          municipality: address.temporary.municipality,
+          wardNumber: address.temporary.wardNumber,
+          locality: address.temporary.locality,
+        },
       },
     });
 

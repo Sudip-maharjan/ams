@@ -285,7 +285,7 @@ export default function StudentDetails({
           </div>
         </div>
 
-        <form onSubmit={handleSubmit} className="px-8 py-7 space-y-5">
+        <form onSubmit={handleSubmit} className="px-2 py-7 space-y-5">
           {/* Category + Sub-Category row */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div>
@@ -393,7 +393,8 @@ export default function StudentDetails({
 
           <div>
             <Label required>Name</Label>
-            <div className="grid grid-cols-[130px_1fr_1fr] gap-3">
+            {/* Mobile: salutation + first name on same row, middle name below; sm+: all three in one row */}
+            <div className="grid grid-cols-[75px_1fr] sm:grid-cols-[130px_1fr_1fr] gap-3">
               <Select
                 field="salutation"
                 placeholder="Select"
@@ -412,6 +413,7 @@ export default function StudentDetails({
               <Input
                 field="middleName"
                 placeholder="Middle name"
+                className="col-span-2 sm:col-span-1"
                 value={form.middleName}
                 error={errors.middleName}
                 onChange={handle}

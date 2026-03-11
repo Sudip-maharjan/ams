@@ -22,7 +22,7 @@ export default function Home() {
   return (
     <div className="min-h-screen font-sans pb-20">
       <Header />
-      <main className="max-w-4xl mx-auto px-4 mt-8 space-y-6">
+      <main className="max-w-4xl mx-auto px-4 mt-6 space-y-6">
         <MotionSection
           delay={0.1}
           className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden"
