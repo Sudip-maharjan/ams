@@ -57,6 +57,21 @@ export type StudentDetailsHandle = {
   reset: () => void;
 };
 
+const numericOnly = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  if (
+    !/[\d]/.test(e.key) &&
+    !["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"].includes(e.key)
+  ) {
+    e.preventDefault();
+  }
+};
+
+const noNumbers = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  if (/[\d]/.test(e.key)) {
+    e.preventDefault();
+  }
+};
+
 type StudentDetailsProps = {
   onChange?: (form: FormFields) => void;
 };
@@ -102,6 +117,8 @@ const Input = ({
   field,
   placeholder,
   type = "text",
+  inputMode,
+  onKeyDown,
   className = "",
   value,
   error,
@@ -110,6 +127,8 @@ const Input = ({
   field: keyof FormFields;
   placeholder: string;
   type?: string;
+  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
   className?: string;
   value: string;
   error?: string;
@@ -122,6 +141,7 @@ const Input = ({
       type={type}
       value={value}
       onChange={onChange(field)}
+      onKeyDown={onKeyDown}
       placeholder={placeholder}
       className={`w-full px-3.5 py-2.5 rounded-lg border text-sm text-slate-800 placeholder-slate-400 bg-white transition-all outline-none ${
         error
@@ -345,6 +365,9 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
                 <Label required>MEC Roll Number</Label>
                 <Input
                   field="mecRollNumber"
+                  type="text"
+                  inputMode="numeric"
+                  onKeyDown={numericOnly}
                   placeholder="2024XXXX"
                   value={form.mecRollNumber}
                   error={errors.mecRollNumber}
@@ -356,7 +379,9 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
                 <Input
                   field="mecRank"
                   placeholder="120"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  onKeyDown={numericOnly}
                   value={form.mecRank}
                   error={errors.mecRank}
                   onChange={handle}
@@ -367,7 +392,9 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
                 <Input
                   field="mecScore"
                   placeholder="100"
-                  type="number"
+                  type="text"
+                  inputMode="numeric"
+                  onKeyDown={numericOnly}
                   value={form.mecScore}
                   error={errors.mecScore}
                   onChange={handle}
@@ -425,6 +452,7 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
                 />
                 <Input
                   field="firstName"
+                  onKeyDown={noNumbers}
                   placeholder="First name"
                   value={form.firstName}
                   error={errors.firstName}
@@ -432,6 +460,7 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
                 />
                 <Input
                   field="middleName"
+                  onKeyDown={noNumbers}
                   placeholder="Middle name"
                   className="col-span-2 sm:col-span-1"
                   value={form.middleName}
@@ -445,6 +474,7 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
               <Label required>Last Name</Label>
               <Input
                 field="lastName"
+                onKeyDown={noNumbers}
                 placeholder="Last name"
                 value={form.lastName}
                 error={errors.lastName}
@@ -465,6 +495,7 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
                 </Label>
                 <Input
                   field="firstNameNepali"
+                  onKeyDown={noNumbers}
                   placeholder="पहिलो नाम"
                   value={form.firstNameNepali}
                   error={errors.firstNameNepali}
@@ -475,6 +506,7 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
                 <Label>Middle Name (Nepali)</Label>
                 <Input
                   field="middleNameNepali"
+                  onKeyDown={noNumbers}
                   placeholder="बीचको नाम"
                   value={form.middleNameNepali}
                   error={errors.middleNameNepali}
@@ -485,6 +517,7 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
                 <Label required>Last Name (Nepali)</Label>
                 <Input
                   field="lastNameNepali"
+                  onKeyDown={noNumbers}
                   placeholder="थर"
                   value={form.lastNameNepali}
                   error={errors.lastNameNepali}
