@@ -1,29 +1,53 @@
 "use client";
-import { useState } from "react";
+import { useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import Header from "../Header";
-import StudentDetails from "./StudentDetails";
-import Address, { AddressFields } from "./StudemtAddress";
+import StudentDetails, {
+  StudentDetailsHandle,
+  FormFields,
+} from "./StudentDetails";
+import Address, { AddressFields, AddressHandle } from "./StudemtAddress";
+import FormActions from "./FormActions";
 
 type SubmissionState =
   | { status: "idle" }
   | { status: "loading" }
-  | { status: "success"; amsCode: string }
   | { status: "error"; message: string };
 
 export default function FormLayout() {
+  const router = useRouter();
+  const studentRef = useRef<StudentDetailsHandle>(null);
+  const addressRef = useRef<AddressHandle>(null);
+
   const [submission, setSubmission] = useState<SubmissionState>({
     status: "idle",
   });
   const [addressData, setAddressData] = useState<AddressFields | null>(null);
 
-  const handleSubmit = async (formData: Record<string, string>) => {
+  const handleReset = () => {
+    studentRef.current?.reset();
+    addressRef.current?.reset();
+    setAddressData(null);
+    setSubmission({ status: "idle" });
+  };
+
+  const handleSubmit = async () => {
+    // 1. Validate StudentDetails — returns data or null if invalid
+    const studentData: FormFields | null =
+      studentRef.current?.validate() ?? null;
+
+    // 2. Validate address — returns true/false and sets inline errors
+    const addressOk = addressRef.current?.validate() ?? false;
+
+    if (!studentData || !addressOk) return; // inline errors shown in each section
+
     setSubmission({ status: "loading" });
 
     try {
       const res = await fetch("/api/students", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, address: addressData }),
+        body: JSON.stringify({ ...studentData, address: addressData }),
       });
 
       const json = await res.json().catch(() => null);
@@ -36,7 +60,8 @@ export default function FormLayout() {
         return;
       }
 
-      setSubmission({ status: "success", amsCode: json.amsCode });
+      // 3. Navigate to the dedicated success page with the AMS code in the URL
+      router.push(`/success?amsCode=${encodeURIComponent(json.amsCode)}`);
     } catch {
       setSubmission({
         status: "error",
@@ -49,58 +74,27 @@ export default function FormLayout() {
     <div className="min-h-screen font-sans pb-20">
       <Header />
       <main className="max-w-4xl mx-auto px-2 mt-2 space-y-6">
-        {submission.status === "success" ? (
-          <div className="bg-white rounded-xl border border-emerald-200 shadow-sm overflow-hidden">
-            <div className="p-10 flex flex-col items-center text-center gap-4">
-              <div className="w-16 h-16 rounded-full bg-emerald-100 flex items-center justify-center">
-                <svg
-                  className="w-8 h-8 text-emerald-600"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                  strokeWidth={2}
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    d="M5 13l4 4L19 7"
-                  />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-bold text-slate-800">
-                Application Submitted!
-              </h2>
-              <p className="text-slate-500 max-w-sm">
-                Your application has been received. Please save your submission
-                code — you will need it for future reference.
-              </p>
-              <div className="mt-2 px-8 py-4 bg-emerald-50 border border-emerald-200 rounded-xl">
-                <p className="text-xs font-semibold uppercase tracking-widest text-emerald-600 mb-1">
-                  Your AMS Code
-                </p>
-                <p className="text-3xl font-bold tracking-widest text-emerald-700">
-                  {submission.amsCode}
-                </p>
-              </div>
-              <p className="text-sm text-slate-400 mt-2">
-                A confirmation has been sent to your email and mobile number.
-              </p>
-            </div>
+        {submission.status === "error" && (
+          <div className="bg-red-50 border border-red-200 rounded-xl px-5 py-4 text-sm text-red-700 font-medium">
+            ⚠️ {submission.message}
           </div>
-        ) : (
-          <>
-            {submission.status === "error" && (
-              <div className="bg-red-50 border border-red-200 rounded-xl px-5 py-4 text-sm text-red-700 font-medium">
-                ⚠️ {submission.message}
-              </div>
-            )}
-            <StudentDetails
-              onSubmit={handleSubmit}
-              isLoading={submission.status === "loading"}
-            />
-            <Address onChange={setAddressData} />
-          </>
         )}
+
+        {/* Student Details section — controlled via ref */}
+        <StudentDetails ref={studentRef} />
+
+        {/* Address section */}
+        <Address ref={addressRef} onChange={setAddressData} />
+
+        {/* Add more form sections here in the future — they just need to expose
+            a ref with validate() + reset(), same pattern as StudentDetails     */}
+
+        {/* Shared submit / reset buttons */}
+        <FormActions
+          isLoading={submission.status === "loading"}
+          onReset={handleReset}
+          onSubmit={handleSubmit}
+        />
       </main>
     </div>
   );

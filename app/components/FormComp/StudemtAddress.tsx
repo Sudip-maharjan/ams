@@ -1,5 +1,11 @@
 "use client";
-import { useState } from "react";
+import {
+  useState,
+  useEffect,
+  useRef,
+  useImperativeHandle,
+  forwardRef,
+} from "react";
 
 const PROVINCES = [
   "Koshi Province",
@@ -345,11 +351,20 @@ function AddressBlockForm({
   );
 }
 
+// Ref handle — lets FormLayout call validate() and reset() imperatively
+export type AddressHandle = {
+  validate: () => boolean;
+  reset: () => void;
+};
+
 type AddressProps = {
   onChange?: (data: AddressFields) => void;
 };
 
-export default function Address({ onChange }: AddressProps) {
+const Address = forwardRef<AddressHandle, AddressProps>(function Address(
+  { onChange },
+  ref,
+) {
   const [address, setAddress] = useState<AddressFields>({
     permanent: emptyBlock(),
     temporary: emptyBlock(),
@@ -361,16 +376,51 @@ export default function Address({ onChange }: AddressProps) {
     temporary: {},
   });
 
+  const validateBlock = (
+    block: AddressBlock,
+    key: "permanent" | "temporary",
+  ): boolean => {
+    const blockErrors: Partial<AddressBlock> = {};
+    const required: (keyof AddressBlock)[] = [
+      "province",
+      "district",
+      "municipality",
+      "wardNumber",
+      "locality",
+    ];
+    required.forEach((f) => {
+      if (!block[f]) blockErrors[f] = "This field is required";
+    });
+    setErrors((prev) => ({ ...prev, [key]: blockErrors }));
+    return Object.keys(blockErrors).length === 0;
+  };
+
+  useImperativeHandle(ref, () => ({
+    validate: () => {
+      const permanentOk = validateBlock(address.permanent, "permanent");
+      const temporaryOk = address.sameAsPermanent
+        ? true
+        : validateBlock(address.temporary, "temporary");
+      return permanentOk && temporaryOk;
+    },
+    reset: () => {
+      setAddress({
+        permanent: emptyBlock(),
+        temporary: emptyBlock(),
+        sameAsPermanent: false,
+      });
+      setErrors({ permanent: {}, temporary: {} });
+    },
+  }));
+
   const updatePermanent = (patch: Partial<AddressBlock>) => {
     setAddress((prev) => {
       const updated = { ...prev.permanent, ...patch };
-      const next: AddressFields = {
+      return {
         ...prev,
         permanent: updated,
         temporary: prev.sameAsPermanent ? { ...updated } : prev.temporary,
       };
-      onChange?.(next);
-      return next;
     });
     const keys = Object.keys(patch) as (keyof AddressBlock)[];
     setErrors((prev) => ({
@@ -383,11 +433,10 @@ export default function Address({ onChange }: AddressProps) {
   };
 
   const updateTemporary = (patch: Partial<AddressBlock>) => {
-    setAddress((prev) => {
-      const next = { ...prev, temporary: { ...prev.temporary, ...patch } };
-      onChange?.(next);
-      return next;
-    });
+    setAddress((prev) => ({
+      ...prev,
+      temporary: { ...prev.temporary, ...patch },
+    }));
     const keys = Object.keys(patch) as (keyof AddressBlock)[];
     setErrors((prev) => ({
       ...prev,
@@ -399,17 +448,18 @@ export default function Address({ onChange }: AddressProps) {
   };
 
   const toggleSameAsPermanent = (checked: boolean) => {
-    setAddress((prev) => {
-      const next: AddressFields = {
-        ...prev,
-        sameAsPermanent: checked,
-        temporary: checked ? { ...prev.permanent } : emptyBlock(),
-      };
-      onChange?.(next);
-      return next;
-    });
+    setAddress((prev) => ({
+      ...prev,
+      sameAsPermanent: checked,
+      temporary: checked ? { ...prev.permanent } : emptyBlock(),
+    }));
     if (checked) setErrors((prev) => ({ ...prev, temporary: {} }));
   };
+
+  // Notify parent after each address state update (never inside a setState updater)
+  useEffect(() => {
+    onChange?.(address);
+  }, [address]); // eslint-disable-line react-hooks/exhaustive-deps
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
@@ -489,4 +539,6 @@ export default function Address({ onChange }: AddressProps) {
       </div>
     </div>
   );
-}
+});
+
+export default Address;
