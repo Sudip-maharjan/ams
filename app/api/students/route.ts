@@ -76,6 +76,7 @@ export async function POST(req: NextRequest) {
         status: "SUBMITTED", // always hardcoded — client cannot override
 
         category: body.category,
+        subCategory: body.subCategory || null,
         mecRollNumber: body.mecRollNumber,
         mecRank,
         mecScore,

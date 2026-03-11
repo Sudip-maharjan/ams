@@ -1,8 +1,23 @@
 "use client";
 import { useState } from "react";
 import { college_prog } from "@/lib/data/collegeandprog";
+import "./studentDetails.css";
 
-const CATEGORIES = ["Open", "Scholarship", "Quota"];
+const CATEGORIES = ["Paying", "Foreign", "Scholarship", "Army Funded"];
+const SCHOLARSHIP_SUBCATEGORIES = [
+  "Open",
+  "Female Reservation",
+  "Dalit Female Reservation",
+  "Muslim Female",
+  "Dalit",
+  "Adibasi Janajati",
+  "Khasarya",
+  "Madhesi",
+  "Madhesi Dalit",
+  "Tharu",
+  "Muslim",
+];
+const FOREIGN_SUBCATEGORIES = ["MECEE-BL", "NEET", "MECEE-PG"];
 const PROGRAM_COLLEGES: Record<string, string[]> = college_prog;
 const PROGRAMS = Object.keys(PROGRAM_COLLEGES);
 const GENDERS = ["Male", "Female", "Other"];
@@ -12,6 +27,7 @@ const SALUTATIONS = ["Mr.", "Ms.", "Mrs.", "Dr."];
 
 type FormFields = {
   category: string;
+  subCategory: string;
   mecRollNumber: string;
   mecRank: string;
   mecScore: string;
@@ -126,7 +142,11 @@ const Select = ({
         {placeholder}
       </option>
       {options.map((o: string) => (
-        <option key={o} value={o} className="text-slate-800">
+        <option
+          key={o}
+          value={o}
+          className="optionhover text-slate-800 hover:bg-red-500"
+        >
           {o}
         </option>
       ))}
@@ -151,6 +171,7 @@ export default function StudentDetails({
 }: StudentDetailsProps) {
   const [form, setForm] = useState<FormFields>({
     category: "",
+    subCategory: "",
     mecRollNumber: "",
     mecRank: "",
     mecScore: "",
@@ -176,6 +197,9 @@ export default function StudentDetails({
 
   const required: (keyof FormFields)[] = [
     "category",
+    ...(form.category === "Scholarship" || form.category === "Foreign"
+      ? (["subCategory"] as (keyof FormFields)[])
+      : []),
     "mecRollNumber",
     "mecRank",
     "mecScore",
@@ -201,6 +225,7 @@ export default function StudentDetails({
         ...prev,
         [field]: value,
         ...(field === "program" ? { college: "" } : {}),
+        ...(field === "category" ? { subCategory: "" } : {}),
       }));
       if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
     };
@@ -233,7 +258,7 @@ export default function StudentDetails({
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
-      <div className="p-6">
+      <div className="p-2">
         <div className="px-8 py-6 border-b border-slate-100 flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
             <svg
@@ -261,16 +286,37 @@ export default function StudentDetails({
         </div>
 
         <form onSubmit={handleSubmit} className="px-8 py-7 space-y-5">
-          <div>
-            <Label required>Category</Label>
-            <Select
-              field="category"
-              placeholder="Select Category"
-              options={CATEGORIES}
-              value={form.category}
-              error={errors.category}
-              onChange={handle}
-            />
+          {/* Category + Sub-Category row */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <Label required>Category</Label>
+              <Select
+                field="category"
+                placeholder="Select Category"
+                options={CATEGORIES}
+                value={form.category}
+                error={errors.category}
+                onChange={handle}
+              />
+            </div>
+            {(form.category === "Scholarship" ||
+              form.category === "Foreign") && (
+              <div>
+                <Label required>Sub-Category</Label>
+                <Select
+                  field="subCategory"
+                  placeholder="Select Sub-Category"
+                  options={
+                    form.category === "Scholarship"
+                      ? SCHOLARSHIP_SUBCATEGORIES
+                      : FOREIGN_SUBCATEGORIES
+                  }
+                  value={form.subCategory}
+                  error={errors.subCategory}
+                  onChange={handle}
+                />
+              </div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

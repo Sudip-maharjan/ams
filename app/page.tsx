@@ -169,14 +169,14 @@ export default function Home() {
 
         <MotionSection
           delay={0.4}
-          className="bg-red-50 border border-red-200 rounded-xl overflow-hidden"
+          className="bg-red-50 border-2 border-red-900 rounded-xl overflow-hidden"
         >
-          <div className="p-6">
+          <div className="p-7">
             <h4 className="text-2xl font-bold text-red-800 flex items-center gap-2 mb-4">
               <ShieldAlert className="w-6 h-6" />
               IMPORTANT ADMISSION NOTICE
             </h4>
-            <ol className="list-decimal list-inside space-y-3 text-lg text-red-900 font-medium">
+            <ol className="list-decimal list-inside space-y-3 text-lg text-red-700  font-medium">
               <li className="leading-relaxed">
                 Candidates must follow the University/Academy's code of conduct
                 and academic policies immediately after admission.

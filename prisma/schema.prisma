@@ -23,6 +23,7 @@ model StudentApplication {
   createdAt DateTime          @default(now())
 
   category      String
+  subCategory   String
   mecRollNumber String
   mecRank       Int
   mecScore      Float
