@@ -12,6 +12,7 @@ A full-stack web application for managing student admissions for the **IOM (Inst
 - **DOB auto-conversion** — entering a complete date in AD auto-fills BS (and vice versa), with format and range validation
 - **Academic information section** — two qualification blocks (Grade 10 & Higher Secondary level) with qualification name, university/board, passing year, school details, country, and symbol number; all fields validated before submission
 - **Guardian information section** — Father and Mother details (name & phone required), plus optional Guardian and Grandfather blocks; email and phone format validated where provided
+- **Shared form primitives** — `FormFields.tsx` exports `Label`, `InputField` (`numericOnly`/`noNumbers` props), `SelectField` (`disabled` prop), and `Divider`; consumed by all four section components, eliminating duplicated local definitions
 - **Modular form architecture** — `FormLayout` orchestrates `StudentDetails`, `Address`, `AcademicInfo`, and `GuardianInfo` components via `forwardRef`, each exposing `validate()` and `reset()` methods
 - **`FormActions` component** — dedicated Reset/Submit buttons with loading state
 - **Success page** — displays the generated AMS code after successful submission
@@ -45,7 +46,7 @@ ams/
 │   │   ├── admin/         # Login & logout API routes
 │   │   └── students/      # Student application POST endpoint
 │   ├── components/
-│   │   ├── FormComp/      # FormLayout, StudentDetails, Address, AcademicInfo, GuardianInfo, FormActions
+│   │   ├── FormComp/      # FormLayout, FormFields, StudentDetails, Address, AcademicInfo, GuardianInfo, FormActions
 │   │   └── Header.tsx
 │   ├── students/          # Student application form page
 │   ├── success/           # Success page — displays AMS code from URL search param
@@ -315,6 +316,8 @@ npx prisma studio  # Open Prisma database GUI
 - The `amsCode` is always generated server-side and cannot be set by the client.
 - The `status` field defaults to `SUBMITTED` and is always hardcoded on creation.
 - DOB conversion helpers (`convertADtoBS`, `convertBStoAD`) and constants (`CATEGORIES`, `PROGRAMS`, `GENDERS`, `SALUTATIONS`) are colocated in `@/lib/data/` for reuse across components.
+- `FormFields.tsx` is the single source of truth for `Label`, `InputField`, `SelectField`, and `Divider` — no component defines its own local versions. `InputField` accepts `numericOnly` and `noNumbers` boolean props that replace standalone `onKeyDown` handlers.
+- All `onChange` callbacks across form components use the unified `(val: string) => void` signature.
 - `StudentDetails`, `Address`, `AcademicInfo`, and `GuardianInfo` all use `forwardRef` — `FormLayout` calls `validate()` on all four before submitting and `reset()` on all four when Reset is clicked.
 - `AddressBlock`, `QualificationBlock`, `ParentBlock`, and `GuardianBlock` are embedded Prisma types — stored as inline BSON objects within `StudentApplication`, not as separate collections.
 - `guardian` and `grandfatherName` are optional — the API only persists `guardian` if `guardian.name` is non-empty.
