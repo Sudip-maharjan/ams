@@ -351,7 +351,6 @@ function AddressBlockForm({
   );
 }
 
-// Ref handle — lets FormLayout call validate() and reset() imperatively
 export type AddressHandle = {
   validate: () => boolean;
   reset: () => void;
@@ -456,10 +455,9 @@ const Address = forwardRef<AddressHandle, AddressProps>(function Address(
     if (checked) setErrors((prev) => ({ ...prev, temporary: {} }));
   };
 
-  // Notify parent after each address state update (never inside a setState updater)
   useEffect(() => {
     onChange?.(address);
-  }, [address]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [address]);
 
   return (
     <div className="bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden">
@@ -493,7 +491,6 @@ const Address = forwardRef<AddressHandle, AddressProps>(function Address(
       </div>
 
       <div className="px-8 py-7 space-y-6">
-        {/* Permanent Address */}
         <div className="border border-slate-200 shadow-sm rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-semibold text-slate-700">
             Permanent Address
@@ -506,7 +503,6 @@ const Address = forwardRef<AddressHandle, AddressProps>(function Address(
           />
         </div>
 
-        {/* Same as Permanent checkbox */}
         <label className="flex items-center gap-2.5 cursor-pointer w-fit">
           <input
             type="checkbox"
@@ -519,7 +515,6 @@ const Address = forwardRef<AddressHandle, AddressProps>(function Address(
           </span>
         </label>
 
-        {/* Temporary Address */}
         <div className="border border-slate-200 shadow-sm rounded-xl p-5 space-y-4">
           <h3 className="text-sm font-semibold text-slate-700">
             Temporary Address

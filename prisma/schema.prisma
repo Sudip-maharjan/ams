@@ -26,6 +26,16 @@ type AddressBlock {
   locality     String
 }
 
+type QualificationBlock {
+  qualificationName String
+  universityBoard   String
+  passingYearAD     String
+  schoolName        String
+  schoolAddress     String
+  country           String
+  symbolNumber      String
+}
+
 model StudentApplication {
   id        String            @id @default(auto()) @map("_id") @db.ObjectId
   amsCode   String            @unique
@@ -61,6 +71,9 @@ model StudentApplication {
   // Address — both blocks are required; stored as embedded BSON objects
   permanentAddress AddressBlock
   temporaryAddress AddressBlock
+
+  qualification1 QualificationBlock
+  qualification2 QualificationBlock
 
   @@index([status])
   @@index([createdAt])

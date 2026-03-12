@@ -1,6 +1,5 @@
 "use client";
 import { useState, useImperativeHandle, forwardRef } from "react";
-import { college_prog } from "@/lib/data/collegeandprog";
 import "./studentDetails.css";
 import {
   validate,
@@ -254,7 +253,14 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
           onChange?.(next);
           return next;
         });
-        if (errors[field]) setErrors((prev) => ({ ...prev, [field]: "" }));
+        if (errors[field])
+          setErrors((prev) => ({
+            ...prev,
+            [field]: "",
+            // When AD auto-fills BS (or BS auto-fills AD), clear the paired field's error too
+            ...(field === "dobAD" ? { dobBS: "" } : {}),
+            ...(field === "dobBS" ? { dobAD: "" } : {}),
+          }));
       };
 
     const availableColleges = form.program
@@ -264,7 +270,7 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
     return (
       <div
         data-student-details
-        className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden"
+        className="bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden"
       >
         <div className="p-2">
           <div className="px-8 py-6 border-b border-slate-100 flex items-center gap-4">
@@ -294,7 +300,6 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
           </div>
 
           <div className="px-2 py-7 space-y-5">
-            {/* Category + Sub-Category */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label required>Category</Label>
@@ -510,6 +515,7 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
                 <Input
                   field="dobBS"
                   placeholder="YYYY-MM-DD"
+                  type="date"
                   value={form.dobBS}
                   error={errors.dobBS}
                   onChange={handle}

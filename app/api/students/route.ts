@@ -2,7 +2,6 @@ import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
 import { randomBytes } from "crypto";
 
-// Shape of a single address block sent from the client (matches AddressFields in StudemtAddress.tsx)
 type AddressBlock = {
   country: string;
   province: string;
@@ -10,6 +9,15 @@ type AddressBlock = {
   municipality: string;
   wardNumber: string;
   locality: string;
+};
+type QualificationBlock = {
+  qualificationName: string;
+  universityBoard: string;
+  passingYearAD: string;
+  schoolName: string;
+  schoolAddress: string;
+  country: string;
+  symbolNumber: string;
 };
 
 type AddressPayload = {
@@ -38,7 +46,6 @@ export async function POST(req: NextRequest) {
   try {
     const body = await req.json();
 
-    // --- Required scalar field validation ---
     const requiredFields = [
       "category",
       "mecRollNumber",
@@ -60,7 +67,6 @@ export async function POST(req: NextRequest) {
 
     const missing = requiredFields.filter((f) => !body[f]);
 
-    // Subcategory is required only for Scholarship and Foreign categories
     if (
       (body.category === "Scholarship" || body.category === "Foreign") &&
       !body.subCategory
@@ -75,8 +81,20 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // --- Address validation ---
     const address: AddressPayload | undefined = body.address;
+    const academic = body.academic as
+      | {
+          qualification1: QualificationBlock;
+          qualification2: QualificationBlock;
+        }
+      | undefined;
+
+    if (!academic?.qualification1 || !academic?.qualification2) {
+      return NextResponse.json(
+        { error: "Both qualifications are required" },
+        { status: 400 },
+      );
+    }
 
     if (!address || !address.permanent || !address.temporary) {
       return NextResponse.json(
@@ -97,7 +115,6 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // --- Type coercions & format validation ---
     const dobAD = new Date(body.dobAD);
     if (isNaN(dobAD.getTime())) {
       return NextResponse.json(
@@ -130,13 +147,12 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    // --- Generate unique AMS code server-side ---
     const amsCode = "AMS-" + randomBytes(4).toString("hex").toUpperCase();
 
     const student = await prisma.studentApplication.create({
       data: {
         amsCode,
-        status: "SUBMITTED", // always hardcoded — client cannot override
+        status: "SUBMITTED",
 
         category: body.category,
         subCategory: body.subCategory || null,
@@ -164,7 +180,6 @@ export async function POST(req: NextRequest) {
         bloodGroup: body.bloodGroup || null,
         nationalityDocType: body.nationalityDocType,
 
-        // Embedded address objects — Prisma maps these to nested BSON documents
         permanentAddress: {
           country: address.permanent.country,
           province: address.permanent.province,
@@ -181,6 +196,8 @@ export async function POST(req: NextRequest) {
           wardNumber: address.temporary.wardNumber,
           locality: address.temporary.locality,
         },
+        qualification1: { ...academic.qualification1 },
+        qualification2: { ...academic.qualification2 },
       },
     });
 

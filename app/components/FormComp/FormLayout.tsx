@@ -8,6 +8,10 @@ import StudentDetails, {
 } from "./StudentDetails";
 import Address, { AddressFields, AddressHandle } from "./StudemtAddress";
 import FormActions from "./FormActions";
+import AcademicInfo, {
+  AcademicFields,
+  AcademicInfoHandle,
+} from "./AcademicInfo";
 
 type SubmissionState =
   | { status: "idle" }
@@ -19,6 +23,9 @@ export default function FormLayout() {
   const studentRef = useRef<StudentDetailsHandle>(null);
   const addressRef = useRef<AddressHandle>(null);
 
+  const academicRef = useRef<AcademicInfoHandle>(null);
+  const [academicData, setAcademicData] = useState<AcademicFields | null>(null);
+
   const [submission, setSubmission] = useState<SubmissionState>({
     status: "idle",
   });
@@ -27,19 +34,23 @@ export default function FormLayout() {
   const handleReset = () => {
     studentRef.current?.reset();
     addressRef.current?.reset();
+    academicRef.current?.reset();
     setAddressData(null);
     setSubmission({ status: "idle" });
+    setAcademicData(null);
   };
 
   const handleSubmit = async () => {
-    // 1. Validate StudentDetails — returns data or null if invalid
     const studentData: FormFields | null =
       studentRef.current?.validate() ?? null;
 
-    // 2. Validate address — returns true/false and sets inline errors
     const addressOk = addressRef.current?.validate() ?? false;
 
-    if (!studentData || !addressOk) return; // inline errors shown in each section
+    if (!studentData || !addressOk) return;
+
+    const academicData: AcademicFields | null =
+      academicRef.current?.validate() ?? null;
+    if (!studentData || !addressOk || !academicData) return;
 
     setSubmission({ status: "loading" });
 
@@ -47,7 +58,11 @@ export default function FormLayout() {
       const res = await fetch("/api/students", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...studentData, address: addressData }),
+        body: JSON.stringify({
+          ...studentData,
+          address: addressData,
+          academic: academicData,
+        }),
       });
 
       const json = await res.json().catch(() => null);
@@ -60,7 +75,6 @@ export default function FormLayout() {
         return;
       }
 
-      // 3. Navigate to the dedicated success page with the AMS code in the URL
       router.push(`/success?amsCode=${encodeURIComponent(json.amsCode)}`);
     } catch {
       setSubmission({
@@ -80,16 +94,11 @@ export default function FormLayout() {
           </div>
         )}
 
-        {/* Student Details section — controlled via ref */}
         <StudentDetails ref={studentRef} />
 
-        {/* Address section */}
         <Address ref={addressRef} onChange={setAddressData} />
 
-        {/* Add more form sections here in the future — they just need to expose
-            a ref with validate() + reset(), same pattern as StudentDetails     */}
-
-        {/* Shared submit / reset buttons */}
+        <AcademicInfo ref={academicRef} onChange={setAcademicData} />
         <FormActions
           isLoading={submission.status === "loading"}
           onReset={handleReset}
