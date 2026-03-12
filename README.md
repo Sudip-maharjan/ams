@@ -11,7 +11,8 @@ A full-stack web application for managing student admissions for the **IOM (Inst
 - **Category & subcategory support** — Open, Foreign, and Scholarship categories with subcategory selection
 - **DOB auto-conversion** — entering a complete date in AD auto-fills BS (and vice versa), with format and range validation
 - **Academic information section** — two qualification blocks (Grade 10 & Higher Secondary level) with qualification name, university/board, passing year, school details, country, and symbol number; all fields validated before submission
-- **Modular form architecture** — `FormLayout` orchestrates `StudentDetails`, `Address`, and `AcademicInfo` components via `forwardRef`, each exposing `validate()` and `reset()` methods
+- **Guardian information section** — Father and Mother details (name & phone required), plus optional Guardian and Grandfather blocks; email and phone format validated where provided
+- **Modular form architecture** — `FormLayout` orchestrates `StudentDetails`, `Address`, `AcademicInfo`, and `GuardianInfo` components via `forwardRef`, each exposing `validate()` and `reset()` methods
 - **`FormActions` component** — dedicated Reset/Submit buttons with loading state
 - **Success page** — displays the generated AMS code after successful submission
 - **Server-side AMS code generation** — unique submission code generated on the server and returned after successful submission
@@ -44,7 +45,7 @@ ams/
 │   │   ├── admin/         # Login & logout API routes
 │   │   └── students/      # Student application POST endpoint
 │   ├── components/
-│   │   ├── FormComp/      # FormLayout, StudentDetails, Address, AcademicInfo, FormActions
+│   │   ├── FormComp/      # FormLayout, StudentDetails, Address, AcademicInfo, GuardianInfo, FormActions
 │   │   └── Header.tsx
 │   ├── students/          # Student application form page
 │   ├── success/           # Success page — displays AMS code from URL search param
@@ -167,6 +168,33 @@ Creates a new student application. Returns the created record including the serv
       "country": "Nepal",
       "symbolNumber": "7654321"
     }
+  },
+  "guardian": {
+    "father": {
+      "name": "Ram Maharjan",
+      "phone": "9800000001",
+      "email": "ram@example.com",
+      "education": "Bachelor",
+      "occupation": "Businessman"
+    },
+    "mother": {
+      "name": "Sita Maharjan",
+      "phone": "9800000002",
+      "email": "",
+      "education": "SLC",
+      "occupation": "Homemaker"
+    },
+    "guardian": {
+      "name": "",
+      "phone": "",
+      "email": "",
+      "education": "",
+      "occupation": "",
+      "relationToStudent": ""
+    },
+    "grandfather": {
+      "name": "Hari Maharjan"
+    }
   }
 }
 ```
@@ -206,6 +234,23 @@ type QualificationBlock {
   symbolNumber      String
 }
 
+type ParentBlock {
+  name       String
+  phone      String
+  email      String?
+  education  String?
+  occupation String?
+}
+
+type GuardianBlock {
+  name              String?
+  phone             String?
+  email             String?
+  education         String?
+  occupation        String?
+  relationToStudent String?
+}
+
 model StudentApplication {
   id        String            @id @default(auto()) @map("_id") @db.ObjectId
   amsCode   String            @unique
@@ -243,6 +288,11 @@ model StudentApplication {
 
   qualification1 QualificationBlock
   qualification2 QualificationBlock
+
+  father          ParentBlock
+  mother          ParentBlock
+  guardian        GuardianBlock?
+  grandfatherName String?
 }
 ```
 
@@ -265,6 +315,7 @@ npx prisma studio  # Open Prisma database GUI
 - The `amsCode` is always generated server-side and cannot be set by the client.
 - The `status` field defaults to `SUBMITTED` and is always hardcoded on creation.
 - DOB conversion helpers (`convertADtoBS`, `convertBStoAD`) and constants (`CATEGORIES`, `PROGRAMS`, `GENDERS`, `SALUTATIONS`) are colocated in `@/lib/data/` for reuse across components.
-- `StudentDetails`, `Address`, and `AcademicInfo` all use `forwardRef` — `FormLayout` calls `validate()` on all three before submitting and `reset()` on all three when Reset is clicked.
-- `AddressBlock` and `QualificationBlock` are embedded Prisma types — stored as inline BSON objects within `StudentApplication`, not as separate collections.
+- `StudentDetails`, `Address`, `AcademicInfo`, and `GuardianInfo` all use `forwardRef` — `FormLayout` calls `validate()` on all four before submitting and `reset()` on all four when Reset is clicked.
+- `AddressBlock`, `QualificationBlock`, `ParentBlock`, and `GuardianBlock` are embedded Prisma types — stored as inline BSON objects within `StudentApplication`, not as separate collections.
+- `guardian` and `grandfatherName` are optional — the API only persists `guardian` if `guardian.name` is non-empty.
 - After any schema change, run `npx prisma generate` followed by `npm run dev` with a cleared `.next` cache (`rm -rf .next`).
