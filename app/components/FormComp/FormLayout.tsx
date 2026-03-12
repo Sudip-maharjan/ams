@@ -12,6 +12,10 @@ import AcademicInfo, {
   AcademicFields,
   AcademicInfoHandle,
 } from "./AcademicInfo";
+import GuardianInfo, {
+  GuardianFields,
+  GuardianInfoHandle,
+} from "./GuardianInfo";
 
 type SubmissionState =
   | { status: "idle" }
@@ -26,6 +30,9 @@ export default function FormLayout() {
   const academicRef = useRef<AcademicInfoHandle>(null);
   const [academicData, setAcademicData] = useState<AcademicFields | null>(null);
 
+  const guardianRef = useRef<GuardianInfoHandle>(null);
+  const [guardianData, setGuardianData] = useState<GuardianFields | null>(null);
+
   const [submission, setSubmission] = useState<SubmissionState>({
     status: "idle",
   });
@@ -35,6 +42,8 @@ export default function FormLayout() {
     studentRef.current?.reset();
     addressRef.current?.reset();
     academicRef.current?.reset();
+    guardianRef.current?.reset();
+
     setAddressData(null);
     setSubmission({ status: "idle" });
     setAcademicData(null);
@@ -52,6 +61,10 @@ export default function FormLayout() {
       academicRef.current?.validate() ?? null;
     if (!studentData || !addressOk || !academicData) return;
 
+    const guardianData: GuardianFields | null =
+      guardianRef.current?.validate() ?? null;
+    if (!studentData || !addressOk || !academicData || !guardianData) return;
+
     setSubmission({ status: "loading" });
 
     try {
@@ -62,6 +75,7 @@ export default function FormLayout() {
           ...studentData,
           address: addressData,
           academic: academicData,
+          guardian: guardianData,
         }),
       });
 
@@ -99,6 +113,9 @@ export default function FormLayout() {
         <Address ref={addressRef} onChange={setAddressData} />
 
         <AcademicInfo ref={academicRef} onChange={setAcademicData} />
+
+        <GuardianInfo ref={guardianRef} onChange={setGuardianData} />
+
         <FormActions
           isLoading={submission.status === "loading"}
           onReset={handleReset}

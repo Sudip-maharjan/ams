@@ -198,6 +198,13 @@ export async function POST(req: NextRequest) {
         },
         qualification1: { ...academic.qualification1 },
         qualification2: { ...academic.qualification2 },
+
+        father: { ...body.guardian.father },
+        mother: { ...body.guardian.mother },
+        guardian: body.guardian.guardian.name
+          ? { ...body.guardian.guardian }
+          : undefined,
+        grandfatherName: body.guardian.grandfather.name || null,
       },
     });
 

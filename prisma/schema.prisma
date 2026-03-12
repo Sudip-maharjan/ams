@@ -36,6 +36,23 @@ type QualificationBlock {
   symbolNumber      String
 }
 
+type ParentBlock {
+  name       String
+  phone      String
+  email      String?
+  education  String?
+  occupation String?
+}
+type GuardianBlock {
+  name              String?
+  phone             String?
+  email             String?
+  education         String?
+  occupation        String?
+  relationToStudent String?
+}
+
+
 model StudentApplication {
   id        String            @id @default(auto()) @map("_id") @db.ObjectId
   amsCode   String            @unique
@@ -74,6 +91,12 @@ model StudentApplication {
 
   qualification1 QualificationBlock
   qualification2 QualificationBlock
+
+  father      ParentBlock
+  mother      ParentBlock
+  guardian    GuardianBlock?
+  grandfatherName String?
+
 
   @@index([status])
   @@index([createdAt])
