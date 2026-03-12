@@ -1,4 +1,3 @@
-// app/components/FormComp/FormFields.tsx
 "use client";
 import React from "react";
 
@@ -21,6 +20,9 @@ export const InputField = ({
   error,
   type = "text",
   inputMode,
+  className = "",
+  numericOnly = false,
+  noNumbers = false,
   onChange,
 }: {
   placeholder: string;
@@ -28,25 +30,43 @@ export const InputField = ({
   error?: string;
   type?: string;
   inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
+  className?: string;
+  /** Block all non-digit key presses */
+  numericOnly?: boolean;
+  /** Block digit key presses */
+  noNumbers?: boolean;
   onChange: (val: string) => void;
-}) => (
-  <div>
-    <input
-      type={type}
-      inputMode={inputMode}
-      value={value}
-      onChange={(e) => onChange(e.target.value)}
-      placeholder={placeholder}
-      className={`w-full px-3.5 py-2.5 rounded-lg border text-sm text-slate-800 placeholder-slate-400 bg-white transition-all outline-none
-        ${
-          error
-            ? "border-red-400 ring-1 ring-red-300 focus:ring-red-400"
-            : "border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-        }`}
-    />
-    {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
-  </div>
-);
+}) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const nav = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"];
+    if (numericOnly && !/[\d]/.test(e.key) && !nav.includes(e.key)) {
+      e.preventDefault();
+    }
+    if (noNumbers && /[\d]/.test(e.key)) {
+      e.preventDefault();
+    }
+  };
+
+  return (
+    <div className={className}>
+      <input
+        type={type}
+        inputMode={inputMode}
+        value={value}
+        onChange={(e) => onChange(e.target.value)}
+        onKeyDown={numericOnly || noNumbers ? handleKeyDown : undefined}
+        placeholder={placeholder}
+        className={`w-full px-3.5 py-2.5 rounded-lg border text-sm text-slate-800 placeholder-slate-400 bg-white transition-all outline-none
+          ${
+            error
+              ? "border-red-400 ring-1 ring-red-300 focus:ring-red-400"
+              : "border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+          }`}
+      />
+      {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+    </div>
+  );
+};
 
 export const SelectField = ({
   placeholder,
@@ -87,5 +107,15 @@ export const SelectField = ({
       ))}
     </select>
     {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
+  </div>
+);
+
+export const Divider = ({ label }: { label: string }) => (
+  <div className="flex items-center gap-3 my-6">
+    <div className="h-px flex-1 bg-slate-100" />
+    <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">
+      {label}
+    </span>
+    <div className="h-px flex-1 bg-slate-100" />
   </div>
 );

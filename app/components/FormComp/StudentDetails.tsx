@@ -17,6 +17,7 @@ import {
   BLOOD_GROUPS,
   NATIONALITY_DOCS,
 } from "@/lib/data/collegeandprog";
+import { Label, InputField, SelectField, Divider } from "./FormFields";
 
 export type FormFields = {
   category: string;
@@ -47,21 +48,6 @@ export type StudentDetailsHandle = {
   reset: () => void;
 };
 
-const numericOnly = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  if (
-    !/[\d]/.test(e.key) &&
-    !["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"].includes(e.key)
-  ) {
-    e.preventDefault();
-  }
-};
-
-const noNumbers = (e: React.KeyboardEvent<HTMLInputElement>) => {
-  if (/[\d]/.test(e.key)) {
-    e.preventDefault();
-  }
-};
-
 type StudentDetailsProps = {
   onChange?: (form: FormFields) => void;
 };
@@ -90,119 +76,6 @@ const emptyForm = (): FormFields => ({
   nationalityDocType: "",
 });
 
-const Label = ({
-  children,
-  required,
-}: {
-  children: React.ReactNode;
-  required?: boolean;
-}) => (
-  <label className="block text-sm font-medium text-slate-700 mb-1.5">
-    {children}
-    {required && <span className="text-red-500 ml-1">*</span>}
-  </label>
-);
-
-const Input = ({
-  field,
-  placeholder,
-  type = "text",
-  inputMode,
-  onKeyDown,
-  className = "",
-  value,
-  error,
-  onChange,
-}: {
-  field: keyof FormFields;
-  placeholder: string;
-  type?: string;
-  inputMode?: React.HTMLAttributes<HTMLInputElement>["inputMode"];
-  onKeyDown?: (e: React.KeyboardEvent<HTMLInputElement>) => void;
-  className?: string;
-  value: string;
-  error?: string;
-  onChange: (
-    field: keyof FormFields,
-  ) => (e: React.ChangeEvent<HTMLInputElement>) => void;
-}) => (
-  <div className={className}>
-    <input
-      type={type}
-      value={value}
-      onChange={onChange(field)}
-      onKeyDown={onKeyDown}
-      inputMode={inputMode}
-      placeholder={placeholder}
-      className={`w-full px-3.5 py-2.5 rounded-lg border text-sm text-slate-800 placeholder-slate-400 bg-white transition-all outline-none ${
-        error
-          ? "border-red-400 ring-1 ring-red-300 focus:ring-red-400"
-          : "border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-      }`}
-    />
-    {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
-  </div>
-);
-
-const Select = ({
-  field,
-  placeholder,
-  options,
-  className = "",
-  disabled = false,
-  value,
-  error,
-  onChange,
-}: {
-  field: keyof FormFields;
-  placeholder: string;
-  options: string[];
-  className?: string;
-  disabled?: boolean;
-  value: string;
-  error?: string;
-  onChange: (
-    field: keyof FormFields,
-  ) => (e: React.ChangeEvent<HTMLSelectElement>) => void;
-}) => (
-  <div className={className}>
-    <select
-      value={value}
-      onChange={onChange(field)}
-      disabled={disabled}
-      className={`w-full px-3.5 py-2.5 rounded-lg border text-sm bg-white transition-all outline-none appearance-none ${
-        disabled
-          ? "cursor-not-allowed opacity-50 bg-slate-50"
-          : "cursor-pointer"
-      } ${!value ? "text-slate-400" : "text-slate-800"} ${
-        error
-          ? "border-red-400 ring-1 ring-red-300 focus:ring-red-400"
-          : "border-slate-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
-      }`}
-    >
-      <option value="" disabled>
-        {placeholder}
-      </option>
-      {options.map((o: string) => (
-        <option key={o} value={o} className="optionhover text-slate-800">
-          {o}
-        </option>
-      ))}
-    </select>
-    {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
-  </div>
-);
-
-const Divider = ({ label }: { label: string }) => (
-  <div className="flex items-center gap-3 my-6">
-    <div className="h-px flex-1 bg-slate-100" />
-    <span className="text-xs font-semibold uppercase tracking-widest text-slate-400">
-      {label}
-    </span>
-    <div className="h-px flex-1 bg-slate-100" />
-  </div>
-);
-
 const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
   function StudentDetails({ onChange }, ref) {
     const [form, setForm] = useState<FormFields>(emptyForm());
@@ -228,40 +101,37 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
       },
     }));
 
-    const handle =
-      (field: keyof FormFields) =>
-      (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const value = e.target.value;
-        setForm((prev) => {
-          let next = {
-            ...prev,
-            [field]: value,
-            ...(field === "program" ? { college: "" } : {}),
-            ...(field === "category" ? { subCategory: "" } : {}),
-          };
+    // Single unified handler — takes a field key and returns a (val: string) => void
+    const handle = (field: keyof FormFields) => (value: string) => {
+      setForm((prev) => {
+        let next: FormFields = {
+          ...prev,
+          [field]: value,
+          ...(field === "program" ? { college: "" } : {}),
+          ...(field === "category" ? { subCategory: "" } : {}),
+        };
 
-          if (field === "dobAD" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-            const bs = convertADtoBS(value);
-            if (bs) next = { ...next, dobBS: bs };
-          }
+        if (field === "dobAD" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+          const bs = convertADtoBS(value);
+          if (bs) next = { ...next, dobBS: bs };
+        }
 
-          if (field === "dobBS" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
-            const ad = convertBStoAD(value);
-            if (ad) next = { ...next, dobAD: ad };
-          }
+        if (field === "dobBS" && /^\d{4}-\d{2}-\d{2}$/.test(value)) {
+          const ad = convertBStoAD(value);
+          if (ad) next = { ...next, dobAD: ad };
+        }
 
-          onChange?.(next);
-          return next;
-        });
-        if (errors[field])
-          setErrors((prev) => ({
-            ...prev,
-            [field]: "",
-            // When AD auto-fills BS (or BS auto-fills AD), clear the paired field's error too
-            ...(field === "dobAD" ? { dobBS: "" } : {}),
-            ...(field === "dobBS" ? { dobAD: "" } : {}),
-          }));
-      };
+        onChange?.(next);
+        return next;
+      });
+
+      setErrors((prev) => ({
+        ...prev,
+        [field]: "",
+        ...(field === "dobAD" ? { dobBS: "" } : {}),
+        ...(field === "dobBS" ? { dobAD: "" } : {}),
+      }));
+    };
 
     const availableColleges = form.program
       ? (PROGRAM_COLLEGES[form.program] ?? [])
@@ -303,21 +173,19 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label required>Category</Label>
-                <Select
-                  field="category"
+                <SelectField
                   placeholder="Select Category"
                   options={CATEGORIES}
                   value={form.category}
                   error={errors.category}
-                  onChange={handle}
+                  onChange={handle("category")}
                 />
               </div>
               {(form.category === "Scholarship" ||
                 form.category === "Foreign") && (
                 <div>
                   <Label required>Sub-Category</Label>
-                  <Select
-                    field="subCategory"
+                  <SelectField
                     placeholder="Select Sub-Category"
                     options={
                       form.category === "Scholarship"
@@ -326,7 +194,7 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
                     }
                     value={form.subCategory}
                     error={errors.subCategory}
-                    onChange={handle}
+                    onChange={handle("subCategory")}
                   />
                 </div>
               )}
@@ -335,41 +203,35 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <Label required>MEC Roll Number</Label>
-                <Input
-                  field="mecRollNumber"
-                  type="text"
-                  inputMode="numeric"
-                  onKeyDown={numericOnly}
+                <InputField
                   placeholder="2024XXXX"
                   value={form.mecRollNumber}
                   error={errors.mecRollNumber}
-                  onChange={handle}
+                  inputMode="numeric"
+                  numericOnly
+                  onChange={handle("mecRollNumber")}
                 />
               </div>
               <div>
                 <Label required>MEC Rank</Label>
-                <Input
-                  field="mecRank"
+                <InputField
                   placeholder="120"
-                  type="text"
-                  inputMode="numeric"
-                  onKeyDown={numericOnly}
                   value={form.mecRank}
                   error={errors.mecRank}
-                  onChange={handle}
+                  inputMode="numeric"
+                  numericOnly
+                  onChange={handle("mecRank")}
                 />
               </div>
               <div>
                 <Label required>MEC Score</Label>
-                <Input
-                  field="mecScore"
+                <InputField
                   placeholder="100"
-                  type="text"
-                  inputMode="numeric"
-                  onKeyDown={numericOnly}
                   value={form.mecScore}
                   error={errors.mecScore}
-                  onChange={handle}
+                  inputMode="numeric"
+                  numericOnly
+                  onChange={handle("mecScore")}
                 />
               </div>
             </div>
@@ -377,19 +239,17 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div>
                 <Label required>Program</Label>
-                <Select
-                  field="program"
+                <SelectField
                   placeholder="Select program"
                   options={PROGRAMS}
                   value={form.program}
                   error={errors.program}
-                  onChange={handle}
+                  onChange={handle("program")}
                 />
               </div>
               <div>
                 <Label required>College</Label>
-                <Select
-                  field="college"
+                <SelectField
                   placeholder={
                     form.program ? "Select college" : "Select a program first"
                   }
@@ -397,7 +257,7 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
                   disabled={!form.program}
                   value={form.college}
                   error={errors.college}
-                  onChange={handle}
+                  onChange={handle("college")}
                 />
                 {form.program && availableColleges.length > 0 && (
                   <p className="mt-1 text-xs text-slate-400">
@@ -414,43 +274,39 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
             <div>
               <Label required>Name</Label>
               <div className="grid grid-cols-[75px_1fr] sm:grid-cols-[130px_1fr_1fr] gap-3">
-                <Select
-                  field="salutation"
+                <SelectField
                   placeholder="Select"
                   options={SALUTATIONS}
                   value={form.salutation}
                   error={errors.salutation}
-                  onChange={handle}
+                  onChange={handle("salutation")}
                 />
-                <Input
-                  field="firstName"
-                  onKeyDown={noNumbers}
+                <InputField
                   placeholder="First name"
                   value={form.firstName}
                   error={errors.firstName}
-                  onChange={handle}
+                  noNumbers
+                  onChange={handle("firstName")}
                 />
-                <Input
-                  field="middleName"
-                  onKeyDown={noNumbers}
+                <InputField
                   placeholder="Middle name"
-                  className="col-span-2 sm:col-span-1"
                   value={form.middleName}
                   error={errors.middleName}
-                  onChange={handle}
+                  noNumbers
+                  className="col-span-2 sm:col-span-1"
+                  onChange={handle("middleName")}
                 />
               </div>
             </div>
 
             <div>
               <Label required>Last Name</Label>
-              <Input
-                field="lastName"
-                onKeyDown={noNumbers}
+              <InputField
                 placeholder="Last name"
                 value={form.lastName}
                 error={errors.lastName}
-                onChange={handle}
+                noNumbers
+                onChange={handle("lastName")}
               />
             </div>
 
@@ -465,35 +321,32 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
                     ?
                   </span>
                 </Label>
-                <Input
-                  field="firstNameNepali"
-                  onKeyDown={noNumbers}
+                <InputField
                   placeholder="पहिलो नाम"
                   value={form.firstNameNepali}
                   error={errors.firstNameNepali}
-                  onChange={handle}
+                  noNumbers
+                  onChange={handle("firstNameNepali")}
                 />
               </div>
               <div>
                 <Label>Middle Name (Nepali)</Label>
-                <Input
-                  field="middleNameNepali"
-                  onKeyDown={noNumbers}
+                <InputField
                   placeholder="बीचको नाम"
                   value={form.middleNameNepali}
                   error={errors.middleNameNepali}
-                  onChange={handle}
+                  noNumbers
+                  onChange={handle("middleNameNepali")}
                 />
               </div>
               <div>
                 <Label required>Last Name (Nepali)</Label>
-                <Input
-                  field="lastNameNepali"
-                  onKeyDown={noNumbers}
+                <InputField
                   placeholder="थर"
                   value={form.lastNameNepali}
                   error={errors.lastNameNepali}
-                  onChange={handle}
+                  noNumbers
+                  onChange={handle("lastNameNepali")}
                 />
               </div>
             </div>
@@ -501,35 +354,32 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <Label required>Date of Birth (AD)</Label>
-                <Input
-                  field="dobAD"
+                <InputField
                   placeholder="YYYY-MM-DD"
                   type="date"
                   value={form.dobAD}
                   error={errors.dobAD}
-                  onChange={handle}
+                  onChange={handle("dobAD")}
                 />
               </div>
               <div>
                 <Label>Date of Birth (BS)</Label>
-                <Input
-                  field="dobBS"
+                <InputField
                   placeholder="YYYY-MM-DD"
                   type="date"
                   value={form.dobBS}
                   error={errors.dobBS}
-                  onChange={handle}
+                  onChange={handle("dobBS")}
                 />
               </div>
               <div>
                 <Label required>Gender</Label>
-                <Select
-                  field="gender"
+                <SelectField
                   placeholder="Select Gender"
                   options={GENDERS}
                   value={form.gender}
                   error={errors.gender}
-                  onChange={handle}
+                  onChange={handle("gender")}
                 />
               </div>
             </div>
@@ -537,48 +387,44 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
               <div>
                 <Label required>Mobile Number (Nepali)</Label>
-                <Input
-                  field="mobileNumber"
+                <InputField
                   placeholder="98XXXXXXXX"
                   type="tel"
                   value={form.mobileNumber}
                   error={errors.mobileNumber}
-                  onChange={handle}
+                  onChange={handle("mobileNumber")}
                 />
               </div>
               <div>
                 <Label required>Email</Label>
-                <Input
-                  field="email"
+                <InputField
                   placeholder="example@example.com"
                   type="email"
                   value={form.email}
                   error={errors.email}
-                  onChange={handle}
+                  onChange={handle("email")}
                 />
               </div>
               <div>
                 <Label>Blood Group</Label>
-                <Select
-                  field="bloodGroup"
+                <SelectField
                   placeholder="Select Blood Group"
                   options={BLOOD_GROUPS}
                   value={form.bloodGroup}
                   error={errors.bloodGroup}
-                  onChange={handle}
+                  onChange={handle("bloodGroup")}
                 />
               </div>
             </div>
 
             <div className="max-w-xs">
               <Label required>Nationality Document Type</Label>
-              <Select
-                field="nationalityDocType"
+              <SelectField
                 placeholder="Select Nationality Document Type"
                 options={NATIONALITY_DOCS}
                 value={form.nationalityDocType}
                 error={errors.nationalityDocType}
-                onChange={handle}
+                onChange={handle("nationalityDocType")}
               />
             </div>
           </div>
