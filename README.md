@@ -10,7 +10,8 @@ A full-stack web application for managing student admissions for the **IOM (Inst
 - **Multi-field student application form** with client-side validation (English & Nepali name fields, MEC details, program/college selection, DOB in AD & BS with auto-conversion, etc.)
 - **Category & subcategory support** — Open, Foreign, and Scholarship categories with subcategory selection
 - **DOB auto-conversion** — entering a complete date in AD auto-fills BS (and vice versa), with format and range validation
-- **Modular form architecture** — `FormLayout` orchestrates `StudentDetails` and `Address` components via `forwardRef`, each exposing `validate()` and `reset()` methods
+- **Academic information section** — two qualification blocks (Grade 10 & Higher Secondary level) with qualification name, university/board, passing year, school details, country, and symbol number; all fields validated before submission
+- **Modular form architecture** — `FormLayout` orchestrates `StudentDetails`, `Address`, and `AcademicInfo` components via `forwardRef`, each exposing `validate()` and `reset()` methods
 - **`FormActions` component** — dedicated Reset/Submit buttons with loading state
 - **Success page** — displays the generated AMS code after successful submission
 - **Server-side AMS code generation** — unique submission code generated on the server and returned after successful submission
@@ -43,7 +44,7 @@ ams/
 │   │   ├── admin/         # Login & logout API routes
 │   │   └── students/      # Student application POST endpoint
 │   ├── components/
-│   │   ├── FormComp/      # FormLayout, StudentDetails, Address, FormActions
+│   │   ├── FormComp/      # FormLayout, StudentDetails, Address, AcademicInfo, FormActions
 │   │   └── Header.tsx
 │   ├── students/          # Student application form page
 │   ├── success/           # Success page — displays AMS code from URL search param
@@ -127,7 +128,46 @@ Creates a new student application. Returns the created record including the serv
   "mobileNumber": "98XXXXXXXX",
   "email": "example@example.com",
   "bloodGroup": "A+",
-  "nationalityDocType": "Citizenship"
+  "nationalityDocType": "Citizenship",
+  "address": {
+    "permanent": {
+      "country": "Nepal",
+      "province": "Bagmati",
+      "district": "Kathmandu",
+      "municipality": "Kathmandu Metropolitan",
+      "wardNumber": "10",
+      "locality": "Thamel"
+    },
+    "temporary": {
+      "country": "Nepal",
+      "province": "Bagmati",
+      "district": "Kathmandu",
+      "municipality": "Kathmandu Metropolitan",
+      "wardNumber": "10",
+      "locality": "Thamel"
+    },
+    "sameAsPermanent": false
+  },
+  "academic": {
+    "qualification1": {
+      "qualificationName": "SEE",
+      "universityBoard": "National Examinations Board",
+      "passingYearAD": "2020",
+      "schoolName": "Example School",
+      "schoolAddress": "Kathmandu",
+      "country": "Nepal",
+      "symbolNumber": "1234567"
+    },
+    "qualification2": {
+      "qualificationName": "10+2 (NEB)",
+      "universityBoard": "National Examinations Board",
+      "passingYearAD": "2022",
+      "schoolName": "Example College",
+      "schoolAddress": "Kathmandu",
+      "country": "Nepal",
+      "symbolNumber": "7654321"
+    }
+  }
 }
 ```
 
@@ -147,31 +187,62 @@ Creates a new student application. Returns the created record including the serv
 ## Data Model
 
 ```prisma
+type AddressBlock {
+  country      String
+  province     String
+  district     String
+  municipality String
+  wardNumber   String
+  locality     String
+}
+
+type QualificationBlock {
+  qualificationName String
+  universityBoard   String
+  passingYearAD     String
+  schoolName        String
+  schoolAddress     String
+  country           String
+  symbolNumber      String
+}
+
 model StudentApplication {
-  id                 String            @id @default(auto()) @map("_id") @db.ObjectId
-  amsCode            String            @unique
-  status             ApplicationStatus @default(SUBMITTED)
-  createdAt          DateTime          @default(now())
-  category           String
-  mecRollNumber      String
-  mecRank            Int
-  mecScore           Float
-  program            String
-  college            String
-  salutation         String
-  firstName          String
-  middleName         String?
-  lastName           String
-  firstNameNepali    String
-  middleNameNepali   String?
-  lastNameNepali     String
-  dobAD              DateTime
-  dobBS              String?
+  id        String            @id @default(auto()) @map("_id") @db.ObjectId
+  amsCode   String            @unique
+  status    ApplicationStatus @default(SUBMITTED)
+  createdAt DateTime          @default(now())
+
+  category      String
+  subCategory   String?
+  mecRollNumber String
+  mecRank       Int
+  mecScore      Float
+  program       String
+  college       String
+
+  salutation String
+  firstName  String
+  middleName String?
+  lastName   String
+
+  firstNameNepali  String
+  middleNameNepali String?
+  lastNameNepali   String
+
+  dobAD DateTime
+  dobBS String?
+
   gender             String
   mobileNumber       String
   email              String
   bloodGroup         String?
   nationalityDocType String
+
+  permanentAddress AddressBlock
+  temporaryAddress AddressBlock
+
+  qualification1 QualificationBlock
+  qualification2 QualificationBlock
 }
 ```
 
@@ -194,5 +265,6 @@ npx prisma studio  # Open Prisma database GUI
 - The `amsCode` is always generated server-side and cannot be set by the client.
 - The `status` field defaults to `SUBMITTED` and is always hardcoded on creation.
 - DOB conversion helpers (`convertADtoBS`, `convertBStoAD`) and constants (`CATEGORIES`, `PROGRAMS`, `GENDERS`, `SALUTATIONS`) are colocated in `@/lib/data/` for reuse across components.
-- `StudentDetails` and `Address` use `forwardRef` — `FormLayout` calls `validate()` on both before submitting and `reset()` on both when Reset is clicked.
-- After any schema change, run `npx prisma generate` followed by `npm run dev` with a cleared `.next` cache.
+- `StudentDetails`, `Address`, and `AcademicInfo` all use `forwardRef` — `FormLayout` calls `validate()` on all three before submitting and `reset()` on all three when Reset is clicked.
+- `AddressBlock` and `QualificationBlock` are embedded Prisma types — stored as inline BSON objects within `StudentApplication`, not as separate collections.
+- After any schema change, run `npx prisma generate` followed by `npm run dev` with a cleared `.next` cache (`rm -rf .next`).

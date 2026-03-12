@@ -1,8 +1,6 @@
 "use client";
 import { useState, useEffect, useImperativeHandle, forwardRef } from "react";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export type QualificationBlock = {
   qualificationName: string;
   universityBoard: string;
@@ -22,8 +20,6 @@ export type AcademicInfoHandle = {
   validate: () => AcademicFields | null;
   reset: () => void;
 };
-
-// ─── Static Data ──────────────────────────────────────────────────────────────
 
 const QUALIFICATION_1_OPTIONS = [
   "SLC",
@@ -54,13 +50,10 @@ const COUNTRIES = [
   "Other",
 ];
 
-// Generate passing years from current year down to 1990
 const PASSING_YEARS: string[] = Array.from(
   { length: new Date().getFullYear() - 1989 },
   (_, i) => String(new Date().getFullYear() - i),
 );
-
-// ─── Shared sub-components ────────────────────────────────────────────────────
 
 const Label = ({
   children,
@@ -140,8 +133,6 @@ const SelectField = ({
     {error && <p className="mt-1 text-xs text-red-500">{error}</p>}
   </div>
 );
-
-// ─── Qualification block form ─────────────────────────────────────────────────
 
 type QualErrors = Partial<QualificationBlock>;
 
@@ -245,8 +236,6 @@ function QualificationForm({
   );
 }
 
-// ─── Helpers ──────────────────────────────────────────────────────────────────
-
 const emptyQual = (): QualificationBlock => ({
   qualificationName: "",
   universityBoard: "",
@@ -275,8 +264,6 @@ function validateQual(block: QualificationBlock): QualErrors {
   return errs;
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
-
 type AcademicInfoProps = {
   onChange?: (data: AcademicFields) => void;
 };
@@ -300,7 +287,6 @@ const AcademicInfo = forwardRef<AcademicInfoHandle, AcademicInfoProps>(
         setErrors({ qualification1: e1, qualification2: e2 });
 
         if (Object.keys(e1).length > 0 || Object.keys(e2).length > 0) {
-          // Scroll to this section
           document
             .querySelector("[data-academic-info]")
             ?.scrollIntoView({ behavior: "smooth", block: "start" });
@@ -324,7 +310,7 @@ const AcademicInfo = forwardRef<AcademicInfoHandle, AcademicInfoProps>(
           const updated = { ...prev[key], ...patch };
           return { ...prev, [key]: updated };
         });
-        // Clear errors for patched keys
+
         const patchedKeys = Object.keys(patch) as (keyof QualificationBlock)[];
         setErrors((prev) => ({
           ...prev,
@@ -335,20 +321,17 @@ const AcademicInfo = forwardRef<AcademicInfoHandle, AcademicInfoProps>(
         }));
       };
 
-    // Notify parent after state settles - same pattern as StudemtAddress.tsx
     useEffect(() => {
       onChange?.(fields);
-    }, [fields]); // eslint-disable-line react-hooks/exhaustive-deps
+    }, [fields]);
 
     return (
       <div
         data-academic-info
         className="bg-white rounded-xl border border-slate-200 shadow-lg overflow-hidden"
       >
-        {/* Section header */}
         <div className="px-8 py-6 border-b border-slate-100 flex items-center gap-4">
           <div className="w-10 h-10 rounded-xl bg-blue-50 flex items-center justify-center">
-            {/* Book icon */}
             <svg
               className="w-5 h-5 text-blue-500"
               fill="none"
