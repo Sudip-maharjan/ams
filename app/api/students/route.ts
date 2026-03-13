@@ -1,8 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
 import { randomBytes } from "crypto";
-import { writeFile, mkdir } from "fs/promises";
-import path from "path";
+import cloudinary from "../../../lib/cloudinary";
 
 type AddressBlock = {
   country: string;
@@ -228,19 +227,25 @@ export async function POST(req: NextRequest) {
 
     const amsCode = "AMS-" + randomBytes(4).toString("hex").toUpperCase();
 
-    const uploadDir = path.join(process.cwd(), "public", "uploads", amsCode);
-    await mkdir(uploadDir, { recursive: true });
-
     const savedPaths: Partial<Record<FileKey, string>> = {};
 
     for (const key of FILE_KEYS) {
       const file = formData.get(key);
       if (file && file instanceof File) {
-        const ext = file.name.split(".").pop() ?? "bin";
-        const filename = `${key}.${ext}`;
         const bytes = await file.arrayBuffer();
-        await writeFile(path.join(uploadDir, filename), Buffer.from(bytes));
-        savedPaths[key] = `/uploads/${amsCode}/${filename}`;
+        const buffer = Buffer.from(bytes);
+
+        // Upload as base64 data URI
+        const mime = file.type || "application/octet-stream";
+        const base64 = `data:${mime};base64,${buffer.toString("base64")}`;
+
+        const result = await cloudinary.uploader.upload(base64, {
+          folder: `iom-admissions/${amsCode}`,
+          public_id: key,
+          resource_type: "auto", // handles images AND PDFs automatically
+        });
+
+        savedPaths[key] = result.secure_url;
       }
     }
 
