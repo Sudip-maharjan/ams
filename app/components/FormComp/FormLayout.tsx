@@ -17,6 +17,11 @@ import GuardianInfo, {
   GuardianInfoHandle,
 } from "./GuardianInfo";
 
+import DocumentsUpload, {
+  DocumentsFields,
+  DocumentsHandle,
+} from "./DocumentsUpload";
+
 type SubmissionState =
   | { status: "idle" }
   | { status: "loading" }
@@ -33,6 +38,8 @@ export default function FormLayout() {
   const guardianRef = useRef<GuardianInfoHandle>(null);
   const [guardianData, setGuardianData] = useState<GuardianFields | null>(null);
 
+  const documentsRef = useRef<DocumentsHandle>(null);
+
   const [submission, setSubmission] = useState<SubmissionState>({
     status: "idle",
   });
@@ -43,6 +50,7 @@ export default function FormLayout() {
     addressRef.current?.reset();
     academicRef.current?.reset();
     guardianRef.current?.reset();
+    documentsRef.current?.reset();
 
     setAddressData(null);
     setSubmission({ status: "idle" });
@@ -65,18 +73,53 @@ export default function FormLayout() {
       guardianRef.current?.validate() ?? null;
     if (!studentData || !addressOk || !academicData || !guardianData) return;
 
+    const documentsData: DocumentsFields | null =
+      documentsRef.current?.validate() ?? null;
+    if (!documentsData) return;
+
     setSubmission({ status: "loading" });
 
     try {
-      const res = await fetch("/api/students", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
+      const formData = new FormData();
+      formData.append(
+        "data",
+        JSON.stringify({
           ...studentData,
           address: addressData,
           academic: academicData,
           guardian: guardianData,
+          documents: {
+            requiresEquivalence: documentsData.requiresEquivalence,
+            requiresCouncilCertificate:
+              documentsData.requiresCouncilCertificate,
+            requiresBridgeCourse: documentsData.requiresBridgeCourse,
+          },
         }),
+      );
+
+      // Append files
+      const fileKeys = [
+        "nationalityId",
+        "grade10Degree",
+        "grade10Marksheet",
+        "grade12Degree",
+        "grade12Marksheet",
+        "grade12Character",
+        "signatureSpecimen",
+        "passportPhoto",
+        "equivalenceCertificate",
+        "councilCertificate",
+        "bridgeCourseCertificate",
+      ] as const;
+
+      for (const key of fileKeys) {
+        const file = documentsData[key] as File | null;
+        if (file) formData.append(key, file);
+      }
+
+      const res = await fetch("/api/students", {
+        method: "POST",
+        body: formData,
       });
 
       const json = await res.json().catch(() => null);
@@ -115,6 +158,8 @@ export default function FormLayout() {
         <AcademicInfo ref={academicRef} onChange={setAcademicData} />
 
         <GuardianInfo ref={guardianRef} onChange={setGuardianData} />
+
+        <DocumentsUpload ref={documentsRef} />
 
         <FormActions
           isLoading={submission.status === "loading"}

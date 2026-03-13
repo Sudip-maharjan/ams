@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "../../../lib/prisma";
 import { randomBytes } from "crypto";
+import { writeFile, mkdir } from "fs/promises";
+import path from "path";
 
 type AddressBlock = {
   country: string;
@@ -10,6 +12,7 @@ type AddressBlock = {
   wardNumber: string;
   locality: string;
 };
+
 type QualificationBlock = {
   qualificationName: string;
   universityBoard: string;
@@ -26,6 +29,12 @@ type AddressPayload = {
   sameAsPermanent: boolean;
 };
 
+type DocumentsPayload = {
+  requiresEquivalence: boolean;
+  requiresCouncilCertificate: boolean;
+  requiresBridgeCourse: boolean;
+};
+
 const ADDRESS_BLOCK_FIELDS: (keyof AddressBlock)[] = [
   "country",
   "province",
@@ -35,16 +44,41 @@ const ADDRESS_BLOCK_FIELDS: (keyof AddressBlock)[] = [
   "locality",
 ];
 
-/** Returns an array of missing field names within an address block, prefixed with the block label. */
 function validateAddressBlock(block: AddressBlock, label: string): string[] {
   return ADDRESS_BLOCK_FIELDS.filter((f) => !block?.[f]).map(
     (f) => `${label}.${f}`,
   );
 }
 
+const FILE_KEYS = [
+  "nationalityId",
+  "grade10Degree",
+  "grade10Marksheet",
+  "grade12Degree",
+  "grade12Marksheet",
+  "grade12Character",
+  "signatureSpecimen",
+  "passportPhoto",
+  "equivalenceCertificate",
+  "councilCertificate",
+  "bridgeCourseCertificate",
+] as const;
+
+type FileKey = (typeof FILE_KEYS)[number];
+
 export async function POST(req: NextRequest) {
   try {
-    const body = await req.json();
+    const formData = await req.formData();
+    const rawData = formData.get("data");
+
+    if (!rawData || typeof rawData !== "string") {
+      return NextResponse.json(
+        { error: "Missing form data payload" },
+        { status: 400 },
+      );
+    }
+
+    const body = JSON.parse(rawData);
 
     const requiredFields = [
       "category",
@@ -65,13 +99,13 @@ export async function POST(req: NextRequest) {
       "nationalityDocType",
     ] as const;
 
-    const missing = requiredFields.filter((f) => !body[f]);
+    const missing: string[] = requiredFields.filter((f) => !body[f]);
 
     if (
       (body.category === "Scholarship" || body.category === "Foreign") &&
       !body.subCategory
     ) {
-      missing.push("subCategory" as never);
+      missing.push("subCategory");
     }
 
     if (missing.length > 0) {
@@ -82,21 +116,8 @@ export async function POST(req: NextRequest) {
     }
 
     const address: AddressPayload | undefined = body.address;
-    const academic = body.academic as
-      | {
-          qualification1: QualificationBlock;
-          qualification2: QualificationBlock;
-        }
-      | undefined;
 
-    if (!academic?.qualification1 || !academic?.qualification2) {
-      return NextResponse.json(
-        { error: "Both qualifications are required" },
-        { status: 400 },
-      );
-    }
-
-    if (!address || !address.permanent || !address.temporary) {
+    if (!address?.permanent || !address?.temporary) {
       return NextResponse.json(
         { error: "Both permanent and temporary address are required" },
         { status: 400 },
@@ -111,6 +132,20 @@ export async function POST(req: NextRequest) {
     if (addressErrors.length > 0) {
       return NextResponse.json(
         { error: `Missing address fields: ${addressErrors.join(", ")}` },
+        { status: 400 },
+      );
+    }
+
+    const academic = body.academic as
+      | {
+          qualification1: QualificationBlock;
+          qualification2: QualificationBlock;
+        }
+      | undefined;
+
+    if (!academic?.qualification1 || !academic?.qualification2) {
+      return NextResponse.json(
+        { error: "Both qualifications are required" },
         { status: 400 },
       );
     }
@@ -132,8 +167,7 @@ export async function POST(req: NextRequest) {
       );
     }
 
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(body.email)) {
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email)) {
       return NextResponse.json(
         { error: "Invalid email address" },
         { status: 400 },
@@ -147,7 +181,68 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    const documents: DocumentsPayload = body.documents ?? {};
+
+    const mandatoryFileKeys: FileKey[] = [
+      "nationalityId",
+      "grade10Degree",
+      "grade10Marksheet",
+      "grade12Degree",
+      "grade12Marksheet",
+      "grade12Character",
+      "signatureSpecimen",
+      "passportPhoto",
+    ];
+
+    const missingFiles: string[] = [];
+
+    for (const key of mandatoryFileKeys) {
+      if (!formData.get(key)) missingFiles.push(key);
+    }
+
+    if (
+      documents.requiresEquivalence &&
+      !formData.get("equivalenceCertificate")
+    ) {
+      missingFiles.push("equivalenceCertificate");
+    }
+    if (
+      documents.requiresCouncilCertificate &&
+      !formData.get("councilCertificate")
+    ) {
+      missingFiles.push("councilCertificate");
+    }
+    if (
+      documents.requiresBridgeCourse &&
+      !formData.get("bridgeCourseCertificate")
+    ) {
+      missingFiles.push("bridgeCourseCertificate");
+    }
+
+    if (missingFiles.length > 0) {
+      return NextResponse.json(
+        { error: `Missing required files: ${missingFiles.join(", ")}` },
+        { status: 400 },
+      );
+    }
+
     const amsCode = "AMS-" + randomBytes(4).toString("hex").toUpperCase();
+
+    const uploadDir = path.join(process.cwd(), "public", "uploads", amsCode);
+    await mkdir(uploadDir, { recursive: true });
+
+    const savedPaths: Partial<Record<FileKey, string>> = {};
+
+    for (const key of FILE_KEYS) {
+      const file = formData.get(key);
+      if (file && file instanceof File) {
+        const ext = file.name.split(".").pop() ?? "bin";
+        const filename = `${key}.${ext}`;
+        const bytes = await file.arrayBuffer();
+        await writeFile(path.join(uploadDir, filename), Buffer.from(bytes));
+        savedPaths[key] = `/uploads/${amsCode}/${filename}`;
+      }
+    }
 
     const student = await prisma.studentApplication.create({
       data: {
@@ -196,15 +291,24 @@ export async function POST(req: NextRequest) {
           wardNumber: address.temporary.wardNumber,
           locality: address.temporary.locality,
         },
+
         qualification1: { ...academic.qualification1 },
         qualification2: { ...academic.qualification2 },
 
         father: { ...body.guardian.father },
         mother: { ...body.guardian.mother },
-        guardian: body.guardian.guardian.name
+        guardian: body.guardian.guardian?.name
           ? { ...body.guardian.guardian }
           : undefined,
-        grandfatherName: body.guardian.grandfather.name || null,
+        grandfatherName: body.guardian.grandfather?.name || null,
+
+        documentFlags: {
+          requiresEquivalence: documents.requiresEquivalence ?? false,
+          requiresCouncilCertificate:
+            documents.requiresCouncilCertificate ?? false,
+          requiresBridgeCourse: documents.requiresBridgeCourse ?? false,
+        },
+        documentPaths: savedPaths,
       },
     });
 

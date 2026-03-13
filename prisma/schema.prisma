@@ -97,6 +97,8 @@ model StudentApplication {
   guardian    GuardianBlock?
   grandfatherName String?
 
+  documentFlags  Json?
+  documentPaths Json?
 
   @@index([status])
   @@index([createdAt])
