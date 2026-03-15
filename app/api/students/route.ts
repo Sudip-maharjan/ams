@@ -235,14 +235,13 @@ export async function POST(req: NextRequest) {
         const bytes = await file.arrayBuffer();
         const buffer = Buffer.from(bytes);
 
-        // Upload as base64 data URI
         const mime = file.type || "application/octet-stream";
         const base64 = `data:${mime};base64,${buffer.toString("base64")}`;
 
         const result = await cloudinary.uploader.upload(base64, {
           folder: `iom-admissions/${amsCode}`,
           public_id: key,
-          resource_type: "auto", // handles images AND PDFs automatically
+          resource_type: "auto",
         });
 
         savedPaths[key] = result.secure_url;
