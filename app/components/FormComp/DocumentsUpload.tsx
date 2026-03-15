@@ -8,15 +8,11 @@ import {
 } from "react";
 import { Label } from "./FormFields";
 
-// ─── Types ────────────────────────────────────────────────────────────────────
-
 export type DocumentsFields = {
-  // Checkboxes
   requiresEquivalence: boolean;
   requiresCouncilCertificate: boolean;
   requiresBridgeCourse: boolean;
 
-  // Mandatory uploads (null = not yet uploaded)
   nationalityId: File | null;
   grade10Degree: File | null;
   grade10Marksheet: File | null;
@@ -26,7 +22,6 @@ export type DocumentsFields = {
   signatureSpecimen: File | null;
   passportPhoto: File | null;
 
-  // Conditional uploads
   equivalenceCertificate: File | null;
   councilCertificate: File | null;
   bridgeCourseCertificate: File | null;
@@ -41,8 +36,6 @@ export type DocumentsHandle = {
 type DocumentsProps = {
   onChange?: (data: DocumentsFields) => void;
 };
-
-// ─── Config ───────────────────────────────────────────────────────────────────
 
 const MANDATORY_DOCS: { key: keyof DocumentsFields; label: string }[] = [
   {
@@ -76,8 +69,6 @@ const MANDATORY_DOCS: { key: keyof DocumentsFields; label: string }[] = [
 
 const ACCEPT = "image/jpeg,image/png,image/webp,application/pdf";
 
-// ─── Sub-component: single file upload slot ──────────────────────────────────
-
 function FileSlot({
   label,
   required,
@@ -97,7 +88,6 @@ function FileSlot({
   const pick = () => inputRef.current?.click();
 
   const handleFile = (f: File) => {
-    // Max 5 MB
     if (f.size > 5 * 1024 * 1024) {
       alert(`"${f.name}" exceeds the 5 MB limit.`);
       return;
@@ -228,8 +218,6 @@ function FileSlot({
   );
 }
 
-// ─── Main component ───────────────────────────────────────────────────────────
-
 const emptyDocs = (): DocumentsFields => ({
   requiresEquivalence: false,
   requiresCouncilCertificate: false,
@@ -260,7 +248,7 @@ const DocumentsUpload = forwardRef<DocumentsHandle, DocumentsProps>(
         onChange?.(next);
         return next;
       });
-      // Clear errors for changed keys
+
       const keys = Object.keys(patch) as (keyof DocumentsFields)[];
       setErrors((prev) => ({
         ...prev,
@@ -272,12 +260,10 @@ const DocumentsUpload = forwardRef<DocumentsHandle, DocumentsProps>(
       validate: () => {
         const errs: Partial<Record<keyof DocumentsFields, string>> = {};
 
-        // Validate mandatory uploads
         for (const { key } of MANDATORY_DOCS) {
           if (!docs[key]) errs[key] = "Required";
         }
 
-        // Validate conditional uploads
         if (docs.requiresEquivalence && !docs.equivalenceCertificate)
           errs.equivalenceCertificate = "Required";
         if (docs.requiresCouncilCertificate && !docs.councilCertificate)

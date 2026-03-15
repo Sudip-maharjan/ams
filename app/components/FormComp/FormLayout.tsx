@@ -16,7 +16,6 @@ import GuardianInfo, {
   GuardianFields,
   GuardianInfoHandle,
 } from "./GuardianInfo";
-
 import DocumentsUpload, {
   DocumentsFields,
   DocumentsHandle,
@@ -31,19 +30,14 @@ export default function FormLayout() {
   const router = useRouter();
   const studentRef = useRef<StudentDetailsHandle>(null);
   const addressRef = useRef<AddressHandle>(null);
-
   const academicRef = useRef<AcademicInfoHandle>(null);
-  const [academicData, setAcademicData] = useState<AcademicFields | null>(null);
-
   const guardianRef = useRef<GuardianInfoHandle>(null);
-  const [guardianData, setGuardianData] = useState<GuardianFields | null>(null);
-
   const documentsRef = useRef<DocumentsHandle>(null);
 
+  const [addressData, setAddressData] = useState<AddressFields | null>(null);
   const [submission, setSubmission] = useState<SubmissionState>({
     status: "idle",
   });
-  const [addressData, setAddressData] = useState<AddressFields | null>(null);
 
   const handleReset = () => {
     studentRef.current?.reset();
@@ -54,24 +48,21 @@ export default function FormLayout() {
 
     setAddressData(null);
     setSubmission({ status: "idle" });
-    setAcademicData(null);
   };
 
   const handleSubmit = async () => {
     const studentData: FormFields | null =
       studentRef.current?.validate() ?? null;
-
     const addressOk = addressRef.current?.validate() ?? false;
-
     if (!studentData || !addressOk) return;
 
     const academicData: AcademicFields | null =
       academicRef.current?.validate() ?? null;
-    if (!studentData || !addressOk || !academicData) return;
+    if (!academicData) return;
 
     const guardianData: GuardianFields | null =
       guardianRef.current?.validate() ?? null;
-    if (!studentData || !addressOk || !academicData || !guardianData) return;
+    if (!guardianData) return;
 
     const documentsData: DocumentsFields | null =
       documentsRef.current?.validate() ?? null;
@@ -97,7 +88,6 @@ export default function FormLayout() {
         }),
       );
 
-      // Append files
       const fileKeys = [
         "nationalityId",
         "grade10Degree",
@@ -155,9 +145,9 @@ export default function FormLayout() {
 
         <Address ref={addressRef} onChange={setAddressData} />
 
-        <AcademicInfo ref={academicRef} onChange={setAcademicData} />
+        <AcademicInfo ref={academicRef} />
 
-        <GuardianInfo ref={guardianRef} onChange={setGuardianData} />
+        <GuardianInfo ref={guardianRef} />
 
         <DocumentsUpload ref={documentsRef} />
 
