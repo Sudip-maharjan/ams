@@ -5,7 +5,6 @@ import {
   mandatoryDocuments,
   conditionalDocuments,
 } from "@/lib/data/requirements";
-
 import {
   BookOpen,
   HelpCircle,

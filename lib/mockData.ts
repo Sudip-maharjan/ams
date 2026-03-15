@@ -1,0 +1,363 @@
+export type StudentStatus =
+  | "pending"
+  | "approved"
+  | "rejected"
+  | "under_review";
+
+export interface Student {
+  id: string;
+  studentId: string;
+  firstName: string;
+  middleName?: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  dob: string;
+  gender: "Male" | "Female" | "Other";
+  nationality: string;
+  status: StudentStatus;
+  appliedDate: string;
+  program: string;
+  college: string;
+  faculty: string;
+  semester: string;
+  guardianName: string;
+  guardianPhone: string;
+  guardianRelation: string;
+  province: string;
+  district: string;
+  municipality: string;
+  ward: string;
+  grade10Percent: number;
+  grade12Percent: number;
+  documents: {
+    passportPhoto: string;
+    nationalityId: string;
+    grade10Degree: string;
+    grade10Marksheet: string;
+    grade12Degree: string;
+    grade12Marksheet: string;
+    grade12Character: string;
+    signatureSpecimen: string;
+    equivalenceCertificate?: string;
+    bridgeCourseCertificate?: string;
+    councilCertificate?: string;
+  };
+}
+
+export const mockStudents: Student[] = [
+  {
+    id: "1",
+    studentId: "AMS-09A00F07",
+    firstName: "Anjali",
+    middleName: "Kumari",
+    lastName: "Sharma",
+    email: "anjali.sharma@gmail.com",
+    phone: "9841234567",
+    dob: "2002-04-15",
+    gender: "Female",
+    nationality: "Nepali",
+    status: "pending",
+    appliedDate: "2025-03-01",
+    program: "BBA",
+    college: "Amrit Campus",
+    faculty: "Management",
+    semester: "1st",
+    guardianName: "Ram Prasad Sharma",
+    guardianPhone: "9851234567",
+    guardianRelation: "Father",
+    province: "Bagmati",
+    district: "Kathmandu",
+    municipality: "Kathmandu Metropolitan City",
+    ward: "10",
+    grade10Percent: 82.5,
+    grade12Percent: 78.3,
+    documents: {
+      passportPhoto: "/uploads/AMS-09A00F07/passportPhoto.png",
+      nationalityId: "/uploads/AMS-09A00F07/nationalityId.png",
+      grade10Degree: "/uploads/AMS-09A00F07/grade10Degree.png",
+      grade10Marksheet: "/uploads/AMS-09A00F07/grade10Marksheet.png",
+      grade12Degree: "/uploads/AMS-09A00F07/grade12Degree.png",
+      grade12Marksheet: "/uploads/AMS-09A00F07/grade12Marksheet.png",
+      grade12Character: "/uploads/AMS-09A00F07/grade12Character.png",
+      signatureSpecimen: "/uploads/AMS-09A00F07/signatureSpecimen.png",
+    },
+  },
+  {
+    id: "2",
+    studentId: "AMS-2E5AFA2D",
+    firstName: "Bikash",
+    lastName: "Thapa",
+    email: "bikash.thapa@yahoo.com",
+    phone: "9867654321",
+    dob: "2001-11-22",
+    gender: "Male",
+    nationality: "Nepali",
+    status: "approved",
+    appliedDate: "2025-02-18",
+    program: "BCA",
+    college: "Tribhuvan University",
+    faculty: "Science & Technology",
+    semester: "1st",
+    guardianName: "Hari Bahadur Thapa",
+    guardianPhone: "9812345678",
+    guardianRelation: "Father",
+    province: "Bagmati",
+    district: "Lalitpur",
+    municipality: "Lalitpur Metropolitan City",
+    ward: "5",
+    grade10Percent: 90.0,
+    grade12Percent: 85.75,
+    documents: {
+      passportPhoto: "/uploads/AMS-2E5AFA2D/passportPhoto.png",
+      nationalityId: "/uploads/AMS-2E5AFA2D/nationalityId.png",
+      grade10Degree: "/uploads/AMS-2E5AFA2D/grade10Degree.png",
+      grade10Marksheet: "/uploads/AMS-2E5AFA2D/grade10Marksheet.png",
+      grade12Degree: "/uploads/AMS-2E5AFA2D/grade12Degree.png",
+      grade12Marksheet: "/uploads/AMS-2E5AFA2D/grade12Marksheet.png",
+      grade12Character: "/uploads/AMS-2E5AFA2D/grade12Character.png",
+      signatureSpecimen: "/uploads/AMS-2E5AFA2D/signatureSpecimen.png",
+      equivalenceCertificate:
+        "/uploads/AMS-2E5AFA2D/equivalenceCertificate.png",
+      bridgeCourseCertificate:
+        "/uploads/AMS-2E5AFA2D/bridgeCourseCertificate.png",
+      councilCertificate: "/uploads/AMS-2E5AFA2D/councilCertificate.png",
+    },
+  },
+  {
+    id: "3",
+    studentId: "AMS-C3D4E5F6",
+    firstName: "Sita",
+    lastName: "Rai",
+    email: "sita.rai@gmail.com",
+    phone: "9823456789",
+    dob: "2003-06-09",
+    gender: "Female",
+    nationality: "Nepali",
+    status: "under_review",
+    appliedDate: "2025-03-05",
+    program: "MBBS",
+    college: "KIST Medical College",
+    faculty: "Medicine",
+    semester: "1st",
+    guardianName: "Dhan Bahadur Rai",
+    guardianPhone: "9834567890",
+    guardianRelation: "Father",
+    province: "Province No. 1",
+    district: "Sunsari",
+    municipality: "Dharan Sub-Metropolitan City",
+    ward: "3",
+    grade10Percent: 95.5,
+    grade12Percent: 92.0,
+    documents: {
+      passportPhoto: "/uploads/placeholder.png",
+      nationalityId: "/uploads/placeholder.png",
+      grade10Degree: "/uploads/placeholder.png",
+      grade10Marksheet: "/uploads/placeholder.png",
+      grade12Degree: "/uploads/placeholder.png",
+      grade12Marksheet: "/uploads/placeholder.png",
+      grade12Character: "/uploads/placeholder.png",
+      signatureSpecimen: "/uploads/placeholder.png",
+    },
+  },
+  {
+    id: "4",
+    studentId: "AMS-A1B2C3D4",
+    firstName: "Rohan",
+    lastName: "Gurung",
+    email: "rohan.gurung@hotmail.com",
+    phone: "9856789012",
+    dob: "2002-01-30",
+    gender: "Male",
+    nationality: "Nepali",
+    status: "rejected",
+    appliedDate: "2025-02-10",
+    program: "BE Civil",
+    college: "IOE Pulchowk",
+    faculty: "Engineering",
+    semester: "1st",
+    guardianName: "Man Bahadur Gurung",
+    guardianPhone: "9845678901",
+    guardianRelation: "Father",
+    province: "Gandaki",
+    district: "Kaski",
+    municipality: "Pokhara Metropolitan City",
+    ward: "17",
+    grade10Percent: 65.0,
+    grade12Percent: 58.5,
+    documents: {
+      passportPhoto: "/uploads/placeholder.png",
+      nationalityId: "/uploads/placeholder.png",
+      grade10Degree: "/uploads/placeholder.png",
+      grade10Marksheet: "/uploads/placeholder.png",
+      grade12Degree: "/uploads/placeholder.png",
+      grade12Marksheet: "/uploads/placeholder.png",
+      grade12Character: "/uploads/placeholder.png",
+      signatureSpecimen: "/uploads/placeholder.png",
+    },
+  },
+  {
+    id: "5",
+    studentId: "AMS-F7G8H9I0",
+    firstName: "Priya",
+    middleName: "Devi",
+    lastName: "Adhikari",
+    email: "priya.adhikari@gmail.com",
+    phone: "9878901234",
+    dob: "2003-09-14",
+    gender: "Female",
+    nationality: "Nepali",
+    status: "pending",
+    appliedDate: "2025-03-08",
+    program: "BBS",
+    college: "Shanker Dev Campus",
+    faculty: "Management",
+    semester: "1st",
+    guardianName: "Gopal Prasad Adhikari",
+    guardianPhone: "9867890123",
+    guardianRelation: "Father",
+    province: "Bagmati",
+    district: "Bhaktapur",
+    municipality: "Bhaktapur Municipality",
+    ward: "2",
+    grade10Percent: 76.25,
+    grade12Percent: 72.0,
+    documents: {
+      passportPhoto: "/uploads/placeholder.png",
+      nationalityId: "/uploads/placeholder.png",
+      grade10Degree: "/uploads/placeholder.png",
+      grade10Marksheet: "/uploads/placeholder.png",
+      grade12Degree: "/uploads/placeholder.png",
+      grade12Marksheet: "/uploads/placeholder.png",
+      grade12Character: "/uploads/placeholder.png",
+      signatureSpecimen: "/uploads/placeholder.png",
+    },
+  },
+  {
+    id: "6",
+    studentId: "AMS-J1K2L3M4",
+    firstName: "Suraj",
+    lastName: "Paudel",
+    email: "suraj.paudel@gmail.com",
+    phone: "9801234567",
+    dob: "2001-07-21",
+    gender: "Male",
+    nationality: "Nepali",
+    status: "approved",
+    appliedDate: "2025-02-25",
+    program: "BPharm",
+    college: "Kathmandu University",
+    faculty: "Health Sciences",
+    semester: "1st",
+    guardianName: "Shyam Prasad Paudel",
+    guardianPhone: "9890123456",
+    guardianRelation: "Father",
+    province: "Bagmati",
+    district: "Kavrepalanchok",
+    municipality: "Dhulikhel Municipality",
+    ward: "6",
+    grade10Percent: 88.0,
+    grade12Percent: 83.5,
+    documents: {
+      passportPhoto: "/uploads/placeholder.png",
+      nationalityId: "/uploads/placeholder.png",
+      grade10Degree: "/uploads/placeholder.png",
+      grade10Marksheet: "/uploads/placeholder.png",
+      grade12Degree: "/uploads/placeholder.png",
+      grade12Marksheet: "/uploads/placeholder.png",
+      grade12Character: "/uploads/placeholder.png",
+      signatureSpecimen: "/uploads/placeholder.png",
+    },
+  },
+  {
+    id: "7",
+    studentId: "AMS-N5O6P7Q8",
+    firstName: "Manisha",
+    lastName: "Karki",
+    email: "manisha.karki@gmail.com",
+    phone: "9812348765",
+    dob: "2002-12-03",
+    gender: "Female",
+    nationality: "Nepali",
+    status: "under_review",
+    appliedDate: "2025-03-10",
+    program: "BSc CSIT",
+    college: "Tribhuvan University",
+    faculty: "Science & Technology",
+    semester: "1st",
+    guardianName: "Narendra Karki",
+    guardianPhone: "9823457654",
+    guardianRelation: "Father",
+    province: "Lumbini",
+    district: "Rupandehi",
+    municipality: "Butwal Sub-Metropolitan City",
+    ward: "9",
+    grade10Percent: 87.5,
+    grade12Percent: 81.0,
+    documents: {
+      passportPhoto: "/uploads/placeholder.png",
+      nationalityId: "/uploads/placeholder.png",
+      grade10Degree: "/uploads/placeholder.png",
+      grade10Marksheet: "/uploads/placeholder.png",
+      grade12Degree: "/uploads/placeholder.png",
+      grade12Marksheet: "/uploads/placeholder.png",
+      grade12Character: "/uploads/placeholder.png",
+      signatureSpecimen: "/uploads/placeholder.png",
+    },
+  },
+  {
+    id: "8",
+    studentId: "AMS-R9S0T1U2",
+    firstName: "Dipesh",
+    lastName: "Tamang",
+    email: "dipesh.tamang@gmail.com",
+    phone: "9834561234",
+    dob: "2001-03-17",
+    gender: "Male",
+    nationality: "Nepali",
+    status: "pending",
+    appliedDate: "2025-03-12",
+    program: "LLB",
+    college: "Nepal Law Campus",
+    faculty: "Law",
+    semester: "1st",
+    guardianName: "Bir Bahadur Tamang",
+    guardianPhone: "9845672345",
+    guardianRelation: "Father",
+    province: "Bagmati",
+    district: "Sindhupalchok",
+    municipality: "Melamchi Municipality",
+    ward: "4",
+    grade10Percent: 74.0,
+    grade12Percent: 70.5,
+    documents: {
+      passportPhoto: "/uploads/placeholder.png",
+      nationalityId: "/uploads/placeholder.png",
+      grade10Degree: "/uploads/placeholder.png",
+      grade10Marksheet: "/uploads/placeholder.png",
+      grade12Degree: "/uploads/placeholder.png",
+      grade12Marksheet: "/uploads/placeholder.png",
+      grade12Character: "/uploads/placeholder.png",
+      signatureSpecimen: "/uploads/placeholder.png",
+    },
+  },
+];
+
+export const dashboardStats = {
+  totalApplications: mockStudents.length,
+  pending: mockStudents.filter((s) => s.status === "pending").length,
+  approved: mockStudents.filter((s) => s.status === "approved").length,
+  rejected: mockStudents.filter((s) => s.status === "rejected").length,
+  underReview: mockStudents.filter((s) => s.status === "under_review").length,
+  recentApplications: mockStudents.slice(0, 5),
+  programDistribution: [
+    { program: "BBA", count: 1 },
+    { program: "BCA", count: 1 },
+    { program: "MBBS", count: 1 },
+    { program: "BE Civil", count: 1 },
+    { program: "BBS", count: 1 },
+    { program: "BPharm", count: 1 },
+    { program: "BSc CSIT", count: 1 },
+    { program: "LLB", count: 1 },
+  ],
+};
