@@ -19,23 +19,27 @@ A full-stack web application for managing student admissions for the **IOM (Inst
 - **`FormActions` component** — dedicated Reset/Submit buttons with loading state
 - **Success page** — displays the generated AMS code after successful submission
 - **Server-side AMS code generation** — unique submission code generated on the server and returned after successful submission
-- **Admin section** with login/logout routes
+- **Admin panel** — protected dashboard with JWT authentication (jose) and bcrypt password hashing; includes stats cards, recent applications table, searchable/filterable requests page, approved students page, and a full application detail/approve view; login page sits outside the `(protected)` route group so it renders without the sidebar; status transitions (approve / reject / under review) handled by a dedicated API route
+- **Cryptographic JWT middleware** — `proxy.ts` verifies tokens using jose; the `Admin` model is seeded via `lib/seedadmin.ts`
+- **Animated landing page** — `MotionSection.tsx` wraps Framer Motion scroll animations; `LogoComp.tsx` renders the institution logo
 - **MongoDB** backend via Prisma ORM with a custom output path
 
 ---
 
 ## Tech Stack
 
-| Layer     | Technology                         |
-| --------- | ---------------------------------- |
-| Framework | Next.js 16 (App Router, Turbopack) |
-| Language  | TypeScript                         |
-| Database  | MongoDB Atlas                      |
-| ORM       | Prisma 6                           |
-| Storage   | Cloudinary                         |
-| Styling   | Tailwind CSS                       |
-| Animation | Framer Motion                      |
-| Icons     | Lucide React                       |
+| Layer     | Technology                  |
+| --------- | --------------------------- |
+| Framework | Next.js 16.1.6 (App Router) |
+| Language  | TypeScript 5                |
+| Database  | MongoDB Atlas               |
+| ORM       | Prisma 6.19                 |
+| Storage   | Cloudinary 2                |
+| Auth      | jose 6 (JWT) + bcryptjs     |
+| Date      | nepali-date-converter       |
+| Styling   | Tailwind CSS 4              |
+| Animation | Framer Motion 12            |
+| Icons     | Lucide React                |
 
 ---
 
@@ -44,23 +48,68 @@ A full-stack web application for managing student admissions for the **IOM (Inst
 ```
 ams/
 ├── app/
-│   ├── admin/             # Admin login & dashboard pages
+│   ├── admin/
+│   │   ├── (protected)/          # Admin layout with responsive sidebar
+│   │   │   ├── layout.tsx
+│   │   │   ├── page.tsx          # Dashboard — stats cards and recent applications
+│   │   │   ├── approve/
+│   │   │   │   └── page.tsx      # Full application detail and status action view
+│   │   │   ├── approved/
+│   │   │   │   └── page.tsx      # Approved students list
+│   │   │   └── requests/
+│   │   │       └── page.tsx      # Searchable, filterable applications list
+│   │   └── login/
+│   │       └── page.tsx          # Login page — outside (protected), no sidebar
 │   ├── api/
-│   │   ├── admin/         # Login & logout API routes
-│   │   └── students/      # Student application POST endpoint
+│   │   ├── admin/
+│   │   │   ├── applications/
+│   │   │   │   └── status/
+│   │   │   │       └── route.ts  # PATCH — approve / reject / under review
+│   │   │   ├── login/
+│   │   │   │   └── route.ts      # POST — bcrypt verify + JWT sign
+│   │   │   └── logout/
+│   │   │       └── route.ts      # POST — clear auth cookie
+│   │   └── students/
+│   │       └── route.ts          # POST — create application + Cloudinary upload
 │   ├── components/
-│   │   ├── FormComp/      # FormLayout, FormFields, StudentDetails, Address, AcademicInfo, GuardianInfo, DocumentsUpload, FormActions
-│   │   └── Header.tsx
-│   ├── students/          # Student application form page
-│   ├── success/           # Success page — displays AMS code from URL search param
-│   └── page.tsx           # Landing page
+│   │   ├── FormComp/
+│   │   │   ├── AcademicInfo.tsx
+│   │   │   ├── DocumentsUpload.tsx
+│   │   │   ├── FormActions.tsx
+│   │   │   ├── FormFields.tsx
+│   │   │   ├── FormLayout.tsx
+│   │   │   ├── GuardianInfo.tsx
+│   │   │   ├── StudemtAddress.tsx
+│   │   │   ├── StudentDetails.tsx
+│   │   │   ├── StudentDetailsValidate.ts
+│   │   │   └── studentDetails.css
+│   │   ├── Header.tsx
+│   │   ├── LogoComp.tsx
+│   │   └── MotionSection.tsx
+│   ├── students/
+│   │   └── page.tsx              # Student application form page
+│   ├── success/
+│   │   └── page.tsx              # Displays AMS code from URL search param
+│   └── page.tsx                  # Landing page
 ├── lib/
-│   ├── cloudinary.ts      # Cloudinary client singleton
-│   ├── data/              # Static data (colleges, programs, categories, requirements)
-│   ├── generated/prisma/  # Auto-generated Prisma client
-│   └── prisma.ts          # Prisma client singleton
-└── prisma/
-    └── schema.prisma      # Database schema
+│   ├── auth.ts                   # jose JWT sign/verify helpers
+│   ├── cloudinary.ts             # Cloudinary client singleton
+│   ├── data/
+│   │   ├── collegeandprog.ts     # Programs, colleges, categories, salutations, etc.
+│   │   ├── districts.json
+│   │   ├── locallevel.ts
+│   │   ├── local_levels.json
+│   │   ├── local_level_type.json
+│   │   ├── provinces.json
+│   │   ├── generate.ts
+│   │   └── requirements.ts
+│   ├── generated/prisma/         # Auto-generated Prisma client
+│   ├── mockData.ts               # Mock application data for admin dev/testing
+│   ├── prisma.ts                 # Prisma client singleton
+│   └── seedadmin.ts              # Seeds initial Admin account
+├── prisma/
+│   └── schema.prisma
+└── proxy.ts                      # Middleware — cryptographic JWT verification
 ```
 
 ---
@@ -90,6 +139,8 @@ DATABASE_URL="mongodb+srv://<user>:<password>@<cluster>.mongodb.net/ams"
 CLOUDINARY_CLOUD_NAME="your_cloud_name"
 CLOUDINARY_API_KEY="your_api_key"
 CLOUDINARY_API_SECRET="your_api_secret"
+
+JWT_SECRET="your_jwt_secret_min_32_chars"
 ```
 
 ### Database Setup
@@ -97,6 +148,7 @@ CLOUDINARY_API_SECRET="your_api_secret"
 ```bash
 npx prisma generate
 npx prisma db push
+npx tsx lib/seedadmin.ts   # Creates the initial admin account
 ```
 
 ### Run Development Server
@@ -239,6 +291,26 @@ The request body is a `FormData` object containing:
 }
 ```
 
+### `POST /api/admin/login`
+
+Verifies admin credentials and sets a signed JWT cookie.
+
+**Request body:** `{ "username": "admin", "password": "..." }`
+
+**Response `200`:** Sets `token` HTTP-only cookie; returns `{ "success": true }`.
+
+### `POST /api/admin/logout`
+
+Clears the JWT cookie. Returns `{ "success": true }`.
+
+### `PATCH /api/admin/applications/[id]/status`
+
+Updates the status of a student application.
+
+**Request body:** `{ "status": "APPROVED" | "REJECTED" | "UNDER_REVIEW" }`
+
+**Response `200`:** Returns the updated application record.
+
 ---
 
 ## Data Model
@@ -326,6 +398,13 @@ model StudentApplication {
   documentFlags Json? # { requiresEquivalence, requiresCouncilCertificate, requiresBridgeCourse }
   documentPaths Json? # { nationalityId, grade10Degree, ... } — Cloudinary secure URLs
 }
+
+model Admin {
+  id           String   @id @default(auto()) @map("_id") @db.ObjectId
+  username     String   @unique
+  passwordHash String
+  createdAt    DateTime @default(now())
+}
 ```
 
 ---
@@ -354,4 +433,9 @@ npx prisma studio  # Open Prisma database GUI
 - `documentPaths` stores Cloudinary secure URLs as a JSON blob; `documentFlags` stores the three conditional-document booleans.
 - `AddressBlock`, `QualificationBlock`, `ParentBlock`, and `GuardianBlock` are embedded Prisma types — stored as inline BSON objects within `StudentApplication`, not as separate collections.
 - `guardian` and `grandfatherName` are optional — the API only persists `guardian` if `guardian.name` is non-empty.
+- Admin authentication uses **jose** for JWT signing/verification and **bcryptjs** for password hashing. The JWT secret is read from `JWT_SECRET` in `.env`. Tokens are stored as HTTP-only cookies; `proxy.ts` verifies them cryptographically on every protected route.
+- The admin login page lives at `app/admin/login/` outside the `(protected)` route group, so it renders without the admin layout (no sidebar).
+- Run `npx tsx lib/seedadmin.ts` to create the first admin account before using the admin panel.
+- `lib/mockData.ts` provides mock application data for developing and testing the admin panel without live database entries.
+- `StudemtAddress.tsx` sources province, district, and local-level data from `lib/data/` JSON files (`provinces.json`, `districts.json`, `local_levels.json`) via `locallevel.ts`.
 - After any schema change, run `npx prisma generate` followed by `npm run dev` with a cleared `.next` cache (`rm -rf .next`).
