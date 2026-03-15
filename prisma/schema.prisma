@@ -43,6 +43,7 @@ type ParentBlock {
   education  String?
   occupation String?
 }
+
 type GuardianBlock {
   name              String?
   phone             String?
@@ -52,6 +53,12 @@ type GuardianBlock {
   relationToStudent String?
 }
 
+model Admin {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  username  String   @unique
+  password  String   // bcrypt hash
+  createdAt DateTime @default(now())
+}
 
 model StudentApplication {
   id        String            @id @default(auto()) @map("_id") @db.ObjectId
@@ -92,12 +99,12 @@ model StudentApplication {
   qualification1 QualificationBlock
   qualification2 QualificationBlock
 
-  father      ParentBlock
-  mother      ParentBlock
-  guardian    GuardianBlock?
+  father          ParentBlock
+  mother          ParentBlock
+  guardian        GuardianBlock?
   grandfatherName String?
 
-  documentFlags  Json?
+  documentFlags Json?
   documentPaths Json?
 
   @@index([status])

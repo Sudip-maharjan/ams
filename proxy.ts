@@ -1,16 +1,39 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { jwtVerify } from "jose";
 
-export function proxy(request: NextRequest) {
+const SECRET = new TextEncoder().encode(
+  process.env.JWT_SECRET ?? "change-me-in-production-min-32-chars!!",
+);
+
+export async function proxy(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  const isAdminRoute = pathname.startsWith("/admin");
+  const isLoginPage = pathname === "/admin/login";
+
   const token = request.cookies.get("admin_token")?.value;
-  const isAdminRoute = request.nextUrl.pathname.startsWith("/admin");
-  const isLoginPage = request.nextUrl.pathname === "/admin/login";
 
-  if (isAdminRoute && !isLoginPage && !token) {
-    return NextResponse.redirect(new URL("/admin/login", request.url));
+  let isValidToken = false;
+  if (token) {
+    try {
+      await jwtVerify(token, SECRET);
+      isValidToken = true;
+    } catch {
+      isValidToken = false;
+    }
   }
 
-  if (isLoginPage && token) {
+  if (isAdminRoute && !isLoginPage && !isValidToken) {
+    const response = NextResponse.redirect(
+      new URL("/admin/login", request.url),
+    );
+    if (token)
+      response.cookies.set("admin_token", "", { maxAge: 0, path: "/" });
+    return response;
+  }
+
+  if (isLoginPage && isValidToken) {
     return NextResponse.redirect(new URL("/admin", request.url));
   }
 

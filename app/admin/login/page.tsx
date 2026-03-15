@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ShieldCheck, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { Eye, EyeOff, AlertCircle } from "lucide-react";
 import ShinyLogo from "@/app/components/LogoComp";
 
 export default function AdminLogin() {
@@ -18,19 +18,27 @@ export default function AdminLogin() {
     setLoading(true);
     setError("");
 
-    // Replace with your real API call
-    if (username === "admin" && password === "admin") {
-      // Set cookie via API route
-      await fetch("/api/admin/login", {
+    try {
+      const res = await fetch("/api/admin/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ username, password }),
       });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error ?? "Login failed.");
+        return;
+      }
+
       router.push("/admin");
-    } else {
-      setError("Invalid username or password.");
+      router.refresh(); // sync middleware/server state
+    } catch {
+      setError("Network error. Please try again.");
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   return (
