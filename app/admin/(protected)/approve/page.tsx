@@ -15,7 +15,7 @@ export default async function ApprovePage({
 
   if (!id) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200 p-8 max-w-md">
+      <div className="bg-white rounded-xl mx-auto mt-10 border border-slate-200 p-8 max-w-md">
         <h2 className="font-semibold text-slate-800 mb-4">Find Application</h2>
         <form method="GET" className="flex gap-3">
           <input

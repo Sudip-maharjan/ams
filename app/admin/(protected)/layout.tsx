@@ -63,7 +63,7 @@ export default function AdminLayout({
       )}
       <aside
         className={`
-          fixed top-0 left-0 h-full w-64 bg-white border-r border-slate-200 z-30
+          fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 z-30
           flex flex-col transition-transform duration-300
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
           lg:translate-x-0 lg:static lg:z-auto
@@ -71,7 +71,7 @@ export default function AdminLayout({
       >
         <div className="p-5 border-b border-slate-100 flex items-center justify-between">
           <Link href="/admin">
-            <ShinyLogo src="/logo.svg" width={160} height={36} alt="TU Logo" />
+            <ShinyLogo src="/logo.svg" width={200} height={36} alt="TU Logo" />
           </Link>
           <button
             onClick={() => setSidebarOpen(false)}
@@ -126,7 +126,7 @@ export default function AdminLayout({
           </h1>
         </header>
 
-        <main className="flex-1 p-4 lg:p-6">{children}</main>
+        <main className="flex-1 p-4 h-screen lg:p-6">{children}</main>
       </div>
     </div>
   );
