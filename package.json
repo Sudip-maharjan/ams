@@ -20,7 +20,8 @@
     "nepali-date-converter": "^3.4.0",
     "next": "16.1.6",
     "react": "19.2.3",
-    "react-dom": "19.2.3"
+    "react-dom": "19.2.3",
+    "react-webcam": "^7.2.0"
   },
   "devDependencies": {
     "@faker-js/faker": "^10.3.0",
@@ -29,6 +30,7 @@
     "@types/node": "^20.19.37",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@types/react-webcam": "^1.1.0",
     "eslint": "^9",
     "eslint-config-next": "16.1.6",
     "prisma": "6.19",

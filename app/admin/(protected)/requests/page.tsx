@@ -44,9 +44,9 @@ export default async function RequestsPage({
   });
 
   return (
-    <div className="space-y-4">
+    <div className="flex flex-col gap-4 h-full">
       {/* Filters */}
-      <div className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col sm:flex-row gap-3">
+      <div className="bg-white rounded-xl border border-slate-200 p-4 flex flex-col sm:flex-row gap-3 shrink-0">
         <form method="GET" className="flex gap-3 flex-1">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
@@ -77,17 +77,23 @@ export default async function RequestsPage({
         </form>
       </div>
 
-      {/* Table */}
-      <div className="bg-white rounded-xl border border-slate-200">
-        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between">
+      {/* Table — fixed height, scrolls internally */}
+      <div className="bg-white rounded-xl border border-slate-200 flex flex-col min-h-0 h-100">
+        {/* Table header — sticky, never scrolls */}
+        <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
           <h2 className="font-semibold text-slate-800">Applications</h2>
           <span className="text-sm text-slate-500">
             {applications.length} result{applications.length !== 1 ? "s" : ""}
           </span>
         </div>
-        <div className="overflow-x-auto">
+
+        {/* Scrollable area — exactly 7 rows (each row ~53px + thead ~45px) */}
+        <div
+          className="overflow-auto"
+          style={{ maxHeight: "calc(7 * 53px + 45px)" }}
+        >
           <table className="w-full text-sm">
-            <thead>
+            <thead className="sticky top-0 bg-white z-10">
               <tr className="border-b border-slate-100 text-left">
                 <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
                   AMS Code

@@ -54,22 +54,25 @@ export default function AdminLayout({
     exact ? pathname === href : pathname.startsWith(href);
 
   return (
-    <div className="min-h-screen bg-slate-50 flex">
+    <div className="h-screen bg-slate-50 flex overflow-hidden">
+      {/* Mobile overlay */}
       {sidebarOpen && (
         <div
           className="fixed inset-0 bg-black/40 z-20 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
+
+      {/* Sidebar — fixed, never scrolls */}
       <aside
         className={`
           fixed top-0 left-0 h-screen w-64 bg-white border-r border-slate-200 z-30
           flex flex-col transition-transform duration-300
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
-          lg:translate-x-0 lg:static lg:z-auto
+          lg:translate-x-0
         `}
       >
-        <div className="p-5 border-b border-slate-100 flex items-center justify-between">
+        <div className="p-5 border-b border-slate-100 flex items-center justify-between shrink-0">
           <Link href="/admin">
             <ShinyLogo src="/logo.svg" width={200} height={36} alt="TU Logo" />
           </Link>
@@ -81,7 +84,7 @@ export default function AdminLayout({
           </button>
         </div>
 
-        <nav className="flex-1 px-3 py-4 space-y-1">
+        <nav className="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
           {navItems.map(({ href, label, icon: Icon, exact }) => (
             <Link
               key={href}
@@ -102,7 +105,7 @@ export default function AdminLayout({
           ))}
         </nav>
 
-        <div className="p-3 border-t border-slate-100">
+        <div className="p-3 border-t border-slate-100 shrink-0">
           <button
             onClick={handleLogout}
             className="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-red-600 hover:bg-red-50 transition-colors"
@@ -113,8 +116,10 @@ export default function AdminLayout({
         </div>
       </aside>
 
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-14 bg-white border-b border-slate-200 flex items-center px-4 gap-4 lg:px-6">
+      {/* Content area — offset by sidebar width, fills remaining space */}
+      <div className="flex-1 flex flex-col min-w-0 lg:ml-64">
+        {/* Header — sticky at top of content area */}
+        <header className="sticky top-0 z-10 h-14 bg-white border-b border-slate-200 flex items-center px-4 gap-4 lg:px-6 shrink-0">
           <button
             onClick={() => setSidebarOpen(true)}
             className="lg:hidden text-slate-500 hover:text-slate-700"
@@ -126,7 +131,8 @@ export default function AdminLayout({
           </h1>
         </header>
 
-        <main className="flex-1 p-4 h-screen lg:p-6">{children}</main>
+        {/* Main — scrolls independently of sidebar */}
+        <main className="flex-1 overflow-y-auto p-4 lg:p-6">{children}</main>
       </div>
     </div>
   );

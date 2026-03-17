@@ -1,7 +1,7 @@
-// app/admin/(protected)/approve/ApprovalWizard.tsx
 "use client";
 import { useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Webcam from "react-webcam";
 import {
   User,
   Camera,
@@ -19,8 +19,6 @@ import {
   Clock,
   ShieldCheck,
 } from "lucide-react";
-
-// ─── Types ────────────────────────────────────────────────────────────────────
 
 type AddressBlock = {
   country: string;
@@ -48,6 +46,7 @@ type ParentBlock = {
   education?: string | null;
   occupation?: string | null;
 };
+
 type GuardianBlock = {
   name?: string | null;
   phone?: string | null;
@@ -99,8 +98,6 @@ type Application = {
   documentPaths?: Record<string, string> | null;
 };
 
-// ─── Step config ──────────────────────────────────────────────────────────────
-
 const STEPS = [
   { id: "personal", label: "Personal Details", icon: User },
   { id: "biometric1", label: "Photo Capture", icon: Camera },
@@ -117,8 +114,6 @@ const statusStyles: Record<string, string> = {
   REJECTED: "bg-red-50 text-red-700 border-red-100",
   DRAFT: "bg-slate-100 text-slate-600 border-slate-200",
 };
-
-// ─── Small helpers ────────────────────────────────────────────────────────────
 
 function Field({ label, value }: { label: string; value?: string | null }) {
   if (!value) return null;
@@ -151,43 +146,148 @@ function Section({
   );
 }
 
-function DocLink({ label, url }: { label: string; url?: string }) {
+type PhotoState = "idle" | "capturing" | "preview" | "done";
+
+function PhotoCapture({ onComplete }: { onComplete: (img: string) => void }) {
+  const [state, setState] = useState<PhotoState>("idle");
+  const [imgSrc, setImgSrc] = useState<string | null>(null);
+  const [camError, setCamError] = useState<string | null>(null);
+  const webcamRef = useRef<Webcam>(null);
+
+  const capture = useCallback(() => {
+    const screenshot = webcamRef.current?.getScreenshot();
+    if (screenshot) {
+      setImgSrc(screenshot);
+      setState("preview");
+    } else {
+      setCamError("Failed to capture. Please try again.");
+    }
+  }, []);
+
+  const retake = () => {
+    setImgSrc(null);
+    setCamError(null);
+    setState("capturing");
+  };
+
+  const confirm = () => {
+    if (imgSrc) {
+      setState("done");
+      onComplete(imgSrc);
+    }
+  };
+
   return (
-    <div
-      className={`flex items-center justify-between p-3 rounded-xl border text-sm ${url ? "border-emerald-100 bg-emerald-50/50" : "border-slate-100 bg-slate-50"}`}
-    >
-      <span className={url ? "text-slate-700 font-medium" : "text-slate-400"}>
-        {label}
-      </span>
-      {url ? (
-        <a
-          href={url}
-          target="_blank"
-          rel="noreferrer"
-          className="flex items-center gap-1 text-xs font-semibold text-blue-600 hover:text-blue-800"
-        >
-          View <ExternalLink className="w-3 h-3" />
-        </a>
-      ) : (
-        <span className="text-xs text-slate-400 italic">Not uploaded</span>
+    <div className="flex flex-col items-center gap-6 py-6">
+      {state === "idle" && (
+        <div className="w-72 h-72 rounded-2xl border-2 border-dashed border-slate-200 bg-slate-50 flex items-center justify-center">
+          <Camera className="w-16 h-16 text-slate-300" />
+        </div>
       )}
+
+      {state === "capturing" && (
+        <div className="rounded-2xl overflow-hidden border-2 border-blue-400 shadow-lg">
+          <Webcam
+            ref={webcamRef}
+            audio={false}
+            screenshotFormat="image/jpeg"
+            videoConstraints={{ width: 288, height: 288, facingMode: "user" }}
+            className="w-72 h-72 object-cover"
+            onUserMediaError={() =>
+              setCamError("Camera access denied or unavailable.")
+            }
+          />
+        </div>
+      )}
+
+      {(state === "preview" || state === "done") && imgSrc && (
+        <div
+          className={`rounded-2xl overflow-hidden border-2 shadow-lg
+          ${state === "done" ? "border-emerald-400" : "border-blue-400"}`}
+        >
+          <img src={imgSrc} alt="Captured" className="w-72 h-72 object-cover" />
+        </div>
+      )}
+
+      {camError && (
+        <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 border border-red-100 px-4 py-2.5 rounded-xl">
+          <AlertCircle className="w-4 h-4 shrink-0" /> {camError}
+        </div>
+      )}
+
+      <div className="text-center">
+        {state === "idle" && (
+          <>
+            <p className="text-slate-700 font-semibold mb-1">
+              Ready to capture photo
+            </p>
+            <p className="text-sm text-slate-400 mb-4">
+              Position the student in front of the camera
+            </p>
+            <button
+              onClick={() => {
+                setCamError(null);
+                setState("capturing");
+              }}
+              className="bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-800 transition-colors"
+            >
+              Start Camera
+            </button>
+          </>
+        )}
+
+        {state === "capturing" && (
+          <>
+            <p className="text-sm text-slate-500 mb-4">
+              Ensure the student&apos;s face is clearly visible
+            </p>
+            <button
+              onClick={capture}
+              className="flex items-center gap-2 bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-800 transition-colors mx-auto"
+            >
+              <Camera className="w-4 h-4" /> Capture Photo
+            </button>
+          </>
+        )}
+
+        {state === "preview" && (
+          <>
+            <p className="text-slate-700 font-semibold mb-4">
+              Does this photo look good?
+            </p>
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={retake}
+                className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium border border-slate-200 text-slate-600 hover:bg-slate-50"
+              >
+                <RotateCcw className="w-3.5 h-3.5" /> Retake
+              </button>
+              <button
+                onClick={confirm}
+                className="flex items-center gap-1.5 bg-emerald-600 text-white px-4 py-2 rounded-xl text-sm font-semibold hover:bg-emerald-700"
+              >
+                <Check className="w-3.5 h-3.5" /> Confirm & Continue
+              </button>
+            </div>
+          </>
+        )}
+
+        {state === "done" && (
+          <div className="flex items-center gap-2 text-sm text-emerald-600 font-medium justify-center">
+            <CheckCircle className="w-4 h-4" /> Photo captured and confirmed
+          </div>
+        )}
+      </div>
     </div>
   );
 }
 
-// ─── Biometric simulation panel ───────────────────────────────────────────────
-
-function BiometricCapture({
-  type,
-  onComplete,
-}: {
-  type: "photo" | "fingerprint";
-  onComplete: () => void;
-}) {
-  const [state, setState] = useState<"idle" | "capturing" | "done">("idle");
+function FingerprintCapture({ onComplete }: { onComplete: () => void }) {
+  const [state, setState] = useState<"idle" | "scanning" | "done">("idle");
 
   const start = () => {
-    setState("capturing");
+    setState("scanning");
+
     setTimeout(() => setState("done"), 2500);
   };
 
@@ -198,20 +298,16 @@ function BiometricCapture({
         ${
           state === "idle"
             ? "border-dashed border-slate-200 bg-slate-50"
-            : state === "capturing"
+            : state === "scanning"
               ? "border-blue-400 bg-blue-50 animate-pulse"
               : "border-emerald-400 bg-emerald-50"
         }`}
       >
         {state === "done" ? (
           <CheckCircle className="w-16 h-16 text-emerald-500" />
-        ) : type === "photo" ? (
-          <Camera
-            className={`w-16 h-16 ${state === "capturing" ? "text-blue-500" : "text-slate-300"}`}
-          />
         ) : (
           <Fingerprint
-            className={`w-16 h-16 ${state === "capturing" ? "text-blue-500" : "text-slate-300"}`}
+            className={`w-16 h-16 ${state === "scanning" ? "text-blue-500" : "text-slate-300"}`}
           />
         )}
       </div>
@@ -220,42 +316,36 @@ function BiometricCapture({
         {state === "idle" && (
           <>
             <p className="text-slate-700 font-semibold mb-1">
-              {type === "photo"
-                ? "Ready to capture photo"
-                : "Ready to scan fingerprint"}
+              Ready to scan fingerprint
             </p>
             <p className="text-sm text-slate-400 mb-4">
-              {type === "photo"
-                ? "Position the student in front of the camera"
-                : "Ask the student to place their right index finger on the scanner"}
+              Ask the student to place their right index finger on the scanner
             </p>
             <button
               onClick={start}
               className="bg-blue-700 text-white px-6 py-2.5 rounded-xl text-sm font-semibold hover:bg-blue-800 transition-colors"
             >
-              {type === "photo" ? "Start Camera" : "Start Scanner"}
+              Start Scanner
             </button>
           </>
         )}
-        {state === "capturing" && (
-          <p className="text-blue-600 font-semibold animate-pulse">
-            {type === "photo" ? "Capturing…" : "Scanning…"}
-          </p>
+        {state === "scanning" && (
+          <p className="text-blue-600 font-semibold animate-pulse">Scanning…</p>
         )}
         {state === "done" && (
           <>
             <p className="text-emerald-600 font-bold mb-1">
-              {type === "photo" ? "Photo captured!" : "Fingerprint scanned!"}
+              Fingerprint scanned!
             </p>
             <p className="text-sm text-slate-400 mb-4">
               Biometric data recorded successfully
             </p>
-            <div className="flex gap-3">
+            <div className="flex gap-3 justify-center">
               <button
                 onClick={() => setState("idle")}
                 className="flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium border border-slate-200 text-slate-600 hover:bg-slate-50"
               >
-                <RotateCcw className="w-3.5 h-3.5" /> Retake
+                <RotateCcw className="w-3.5 h-3.5" /> Rescan
               </button>
               <button
                 onClick={onComplete}
@@ -271,9 +361,7 @@ function BiometricCapture({
   );
 }
 
-// ─── Document review checklist ────────────────────────────────────────────────
-
-type DocCheckState = Record<string, boolean | null>; // true=valid, false=invalid, null=pending
+type DocCheckState = Record<string, boolean | null>;
 
 function DocumentChecklist({
   paths,
@@ -323,7 +411,6 @@ function DocumentChecklist({
                     : "border-slate-100 bg-white"
               }`}
           >
-            {/* doc info */}
             <div className="flex-1 min-w-0">
               <p
                 className={`text-sm font-medium ${!url ? "text-slate-400" : "text-slate-700"}`}
@@ -335,7 +422,6 @@ function DocumentChecklist({
               )}
             </div>
 
-            {/* view link */}
             {url && (
               <a
                 href={url}
@@ -347,19 +433,28 @@ function DocumentChecklist({
               </a>
             )}
 
-            {/* approve/reject */}
             <div className="flex items-center gap-1.5 shrink-0">
               <button
                 onClick={() => onChange(key, true)}
+                title="Approve document"
                 className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors
-                  ${status === true ? "bg-emerald-500 text-white" : "bg-slate-100 text-slate-400 hover:bg-emerald-100 hover:text-emerald-600"}`}
+                  ${
+                    status === true
+                      ? "bg-emerald-500 text-white"
+                      : "bg-slate-100 text-slate-400 hover:bg-emerald-100 hover:text-emerald-600"
+                  }`}
               >
                 <Check className="w-3.5 h-3.5" />
               </button>
               <button
                 onClick={() => onChange(key, false)}
+                title="Reject document"
                 className={`w-7 h-7 rounded-lg flex items-center justify-center transition-colors
-                  ${status === false ? "bg-red-500 text-white" : "bg-slate-100 text-slate-400 hover:bg-red-100 hover:text-red-600"}`}
+                  ${
+                    status === false
+                      ? "bg-red-500 text-white"
+                      : "bg-slate-100 text-slate-400 hover:bg-red-100 hover:text-red-600"
+                  }`}
               >
                 <X className="w-3.5 h-3.5" />
               </button>
@@ -371,17 +466,17 @@ function DocumentChecklist({
   );
 }
 
-// ─── Main wizard ──────────────────────────────────────────────────────────────
-
 export default function ApprovalWizard({
   application: app,
 }: {
   application: Application;
 }) {
   const router = useRouter();
+
   const [step, setStep] = useState(0);
   const [personalVerified, setPersonalVerified] = useState(false);
   const [photoDone, setPhotoDone] = useState(false);
+  const [capturedPhoto, setCapturedPhoto] = useState<string | null>(null);
   const [voucherVerified, setVoucherVerified] = useState(false);
   const [docChecks, setDocChecks] = useState<DocCheckState>({});
   const [fingerprintDone, setFingerprintDone] = useState(false);
@@ -417,24 +512,33 @@ export default function ApprovalWizard({
     setSubmitting(true);
     setError("");
     try {
+      if (capturedPhoto && status === "APPROVED") {
+        const bioRes = await fetch("/api/admin/applications/biometric", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ id: app.id, photo: capturedPhoto }),
+        });
+        if (!bioRes.ok) throw new Error("Failed to save biometric photo.");
+      }
+
       const res = await fetch("/api/admin/applications/status", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ id: app.id, status }),
       });
-      if (!res.ok) throw new Error("Failed to update");
+      if (!res.ok) throw new Error("Failed to update status.");
+
       setFinalStatus(status === "APPROVED" ? "approved" : "rejected");
-    } catch {
-      setError("Failed to update status. Please try again.");
+    } catch (e: unknown) {
+      setError(
+        e instanceof Error ? e.message : "An unexpected error occurred.",
+      );
     } finally {
       setSubmitting(false);
     }
   };
 
-  // ─── Step content ────────────────────────────────────────────────────────────
-
   const stepContent = [
-    // ── 0: Personal Details ──────────────────────────────────────────────────
     <div key="personal" className="space-y-4">
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
         <div className="flex items-start justify-between gap-4">
@@ -531,12 +635,27 @@ export default function ApprovalWizard({
             </div>
             {app.grandfatherName && (
               <div>
-                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-1">
                   Grandfather
                 </p>
                 <dd className="text-sm text-slate-800">
                   {app.grandfatherName}
                 </dd>
+              </div>
+            )}
+            {app.guardian?.name && (
+              <div>
+                <p className="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">
+                  Guardian
+                </p>
+                <dl className="grid grid-cols-2 gap-3">
+                  <Field label="Name" value={app.guardian.name} />
+                  <Field label="Phone" value={app.guardian.phone} />
+                  <Field
+                    label="Relation"
+                    value={app.guardian.relationToStudent}
+                  />
+                </dl>
               </div>
             )}
           </div>
@@ -546,9 +665,9 @@ export default function ApprovalWizard({
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
         <label className="flex items-start gap-3 cursor-pointer select-none">
           <div
-            className={`w-5 h-5 mt-0.5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors
-            ${personalVerified ? "bg-blue-600 border-blue-600" : "border-slate-300"}`}
             onClick={() => setPersonalVerified((v) => !v)}
+            className={`w-5 h-5 mt-0.5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors
+              ${personalVerified ? "bg-blue-600 border-blue-600" : "border-slate-300"}`}
           >
             {personalVerified && <Check className="w-3 h-3 text-white" />}
           </div>
@@ -560,42 +679,34 @@ export default function ApprovalWizard({
       </div>
     </div>,
 
-    // ── 1: Photo Capture ─────────────────────────────────────────────────────
     <div key="biometric1" className="max-w-xl mx-auto">
       <Section title="Biometric Photo Capture">
-        <p className="text-sm text-slate-500 mb-6">
-          Capture a live biometric photo of the student. This will be stored as
-          part of the admission record.
+        <p className="text-sm text-slate-500 mb-2">
+          Capture a live photo of the student. This will be stored permanently
+          alongside their admission record.
         </p>
-        <BiometricCapture
-          type="photo"
-          onComplete={() => {
+        <PhotoCapture
+          onComplete={(img) => {
+            setCapturedPhoto(img);
             setPhotoDone(true);
           }}
         />
-        {photoDone && (
-          <div className="mt-4 flex items-center gap-2 text-sm text-emerald-600 font-medium">
-            <CheckCircle className="w-4 h-4" /> Photo successfully captured and
-            saved
-          </div>
-        )}
       </Section>
     </div>,
 
-    // ── 2: Fee Voucher ────────────────────────────────────────────────────────
-    <div key="voucher" className="max-w-2xl mx-auto space-y-4">
+    <div key="voucher" className="max-w-2xl mx-auto">
       <Section title="Fee Voucher Verification">
         <div className="space-y-4">
           <p className="text-sm text-slate-500">
             Verify the student has submitted the admission fee voucher and all
             payment details are correct.
           </p>
-          <div className="bg-slate-50 rounded-xl border border-dashed border-slate-200 p-6 text-center">
+          <div className="bg-slate-50 rounded-xl border border-dashed border-slate-200 p-6">
             <FileText className="w-10 h-10 text-slate-300 mx-auto mb-3" />
-            <p className="text-sm text-slate-500 mb-3">
+            <p className="text-sm text-slate-500 text-center mb-4">
               Collect and verify the physical fee voucher from the student
             </p>
-            <div className="text-left bg-white rounded-lg border border-slate-100 p-4 text-sm space-y-2 mb-4">
+            <div className="bg-white rounded-lg border border-slate-100 p-4 text-sm space-y-2">
               <div className="flex justify-between">
                 <span className="text-slate-500">Student</span>
                 <span className="font-medium text-slate-800">
@@ -624,9 +735,9 @@ export default function ApprovalWizard({
           </div>
           <label className="flex items-start gap-3 cursor-pointer select-none">
             <div
-              className={`w-5 h-5 mt-0.5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors
-              ${voucherVerified ? "bg-blue-600 border-blue-600" : "border-slate-300"}`}
               onClick={() => setVoucherVerified((v) => !v)}
+              className={`w-5 h-5 mt-0.5 rounded-md border-2 flex items-center justify-center shrink-0 transition-colors
+                ${voucherVerified ? "bg-blue-600 border-blue-600" : "border-slate-300"}`}
             >
               {voucherVerified && <Check className="w-3 h-3 text-white" />}
             </div>
@@ -639,12 +750,11 @@ export default function ApprovalWizard({
       </Section>
     </div>,
 
-    // ── 3: Documents ──────────────────────────────────────────────────────────
     <div key="documents" className="max-w-2xl mx-auto">
       <Section title="Document Verification">
         <p className="text-sm text-slate-500 mb-5">
-          Review each uploaded document. Approve (✓) or reject (✗) each one
-          individually. All documents must be approved to proceed.
+          Review each uploaded document. Approve (✓) or reject (✗) each one. All
+          documents must be marked before you can proceed.
         </p>
         <DocumentChecklist
           paths={paths}
@@ -670,17 +780,13 @@ export default function ApprovalWizard({
       </Section>
     </div>,
 
-    // ── 4: Fingerprint ────────────────────────────────────────────────────────
     <div key="biometric2" className="max-w-xl mx-auto">
       <Section title="Fingerprint Scan">
         <p className="text-sm text-slate-500 mb-6">
           Capture the student&apos;s biometric fingerprint. This is required to
           complete the admission process.
         </p>
-        <BiometricCapture
-          type="fingerprint"
-          onComplete={() => setFingerprintDone(true)}
-        />
+        <FingerprintCapture onComplete={() => setFingerprintDone(true)} />
         {fingerprintDone && (
           <div className="mt-4 flex items-center gap-2 text-sm text-emerald-600 font-medium">
             <CheckCircle className="w-4 h-4" /> Fingerprint successfully scanned
@@ -690,7 +796,6 @@ export default function ApprovalWizard({
       </Section>
     </div>,
 
-    // ── 5: Final Approval ─────────────────────────────────────────────────────
     <div key="confirm" className="max-w-2xl mx-auto space-y-4">
       {finalStatus === "idle" ? (
         <>
@@ -706,7 +811,11 @@ export default function ApprovalWizard({
                 <div
                   key={label}
                   className={`flex items-center justify-between p-3 rounded-xl border
-                  ${done ? "border-emerald-100 bg-emerald-50/60" : "border-amber-100 bg-amber-50/50"}`}
+                    ${
+                      done
+                        ? "border-emerald-100 bg-emerald-50/60"
+                        : "border-amber-100 bg-amber-50/50"
+                    }`}
                 >
                   <span
                     className={
@@ -815,21 +924,21 @@ export default function ApprovalWizard({
     </div>,
   ];
 
-  // ─── Step gate logic ─────────────────────────────────────────────────────────
-
   const canProceed =
-    [
-      personalVerified, // step 0 → personal verified
-      photoDone, // step 1 → photo captured
-      voucherVerified, // step 2 → voucher verified
-      allDocsChecked, // step 3 → all docs checked (even if some rejected)
-      fingerprintDone, // step 4 → fingerprint done
-      true, // step 5 → final (always reachable)
-    ][step] ?? true;
+    (
+      [
+        personalVerified,
+        photoDone,
+        voucherVerified,
+        allDocsChecked,
+        fingerprintDone,
+        true,
+      ] as boolean[]
+    )[step] ?? true;
 
   return (
-    <div className="space-y-5 max-w-4xl">
-      {/* Progress stepper */}
+    <div className="space-y-5 max-w-screen">
+      {/* Stepper */}
       <div className="bg-white rounded-2xl border border-slate-100 shadow-sm px-5 py-4">
         <div className="flex items-center gap-1 overflow-x-auto">
           {STEPS.map((s, i) => {
@@ -838,7 +947,9 @@ export default function ApprovalWizard({
             return (
               <div key={s.id} className="flex items-center gap-1 shrink-0">
                 <button
-                  onClick={() => i < step && setStep(i)}
+                  onClick={() => {
+                    if (i < step) setStep(i);
+                  }}
                   disabled={i > step}
                   className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors
                     ${
@@ -865,7 +976,8 @@ export default function ApprovalWizard({
                 </button>
                 {i < STEPS.length - 1 && (
                   <ChevronRight
-                    className={`w-3.5 h-3.5 shrink-0 ${i < step ? "text-emerald-400" : "text-slate-200"}`}
+                    className={`w-3.5 h-3.5 shrink-0
+                      ${i < step ? "text-emerald-400" : "text-slate-200"}`}
                   />
                 )}
               </div>
@@ -874,7 +986,7 @@ export default function ApprovalWizard({
         </div>
       </div>
 
-      {/* Step content */}
+      {/* Content */}
       <div className="min-h-[400px]">{stepContent[step]}</div>
 
       {/* Navigation */}

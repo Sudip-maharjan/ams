@@ -1,4 +1,6 @@
 import { prisma } from "@/lib/prisma";
+import Image from "next/image";
+import { UserCircle } from "lucide-react";
 
 export default async function ApprovedPage() {
   const applications = await prisma.studentApplication.findMany({
@@ -14,6 +16,7 @@ export default async function ApprovedPage() {
       email: true,
       mobileNumber: true,
       createdAt: true,
+      biometricPhotoUrl: true,
     },
   });
 
@@ -32,6 +35,9 @@ export default async function ApprovedPage() {
               <tr className="border-b border-slate-100 text-left">
                 <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
                   AMS Code
+                </th>
+                <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
+                  Photo
                 </th>
                 <th className="px-5 py-3 text-xs font-semibold text-slate-500 uppercase tracking-wide">
                   Name
@@ -56,25 +62,53 @@ export default async function ApprovedPage() {
                   key={app.id}
                   className="hover:bg-slate-50 transition-colors"
                 >
-                  <td className="px-5 py-3 font-mono text-xs text-slate-600">
+                  {/* AMS Code */}
+                  <td className="px-5 py-3 font-mono text-xs text-slate-600 align-middle">
                     {app.amsCode}
                   </td>
-                  <td className="px-5 py-3 font-medium text-slate-800">
+
+                  {/* Biometric photo */}
+                  <td className="px-5 py-3 align-middle">
+                    {app.biometricPhotoUrl ? (
+                      <Image
+                        src={app.biometricPhotoUrl}
+                        alt={`${app.firstName} ${app.lastName}`}
+                        width={36}
+                        height={36}
+                        className="w-9 h-9 rounded-full object-cover border border-slate-200"
+                      />
+                    ) : (
+                      <div className="w-9 h-9 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center">
+                        <UserCircle className="w-5 h-5 text-slate-400" />
+                      </div>
+                    )}
+                  </td>
+
+                  {/* Name */}
+                  <td className="px-5 py-3 font-medium text-slate-800 align-middle">
                     {app.firstName} {app.lastName}
                   </td>
-                  <td className="px-5 py-3 text-slate-600 hidden md:table-cell">
+
+                  {/* Program */}
+                  <td className="px-5 py-3 text-slate-600 hidden md:table-cell align-middle">
                     {app.program}
                   </td>
-                  <td className="px-5 py-3 text-slate-600 hidden lg:table-cell">
+
+                  {/* College */}
+                  <td className="px-5 py-3 text-slate-600 hidden lg:table-cell align-middle">
                     {app.college}
                   </td>
-                  <td className="px-5 py-3 text-slate-600 hidden lg:table-cell">
+
+                  {/* Contact */}
+                  <td className="px-5 py-3 text-slate-600 hidden lg:table-cell align-middle">
                     <div>{app.email}</div>
                     <div className="text-xs text-slate-400">
                       {app.mobileNumber}
                     </div>
                   </td>
-                  <td className="px-5 py-3 text-slate-500 hidden md:table-cell">
+
+                  {/* Date */}
+                  <td className="px-5 py-3 text-slate-500 hidden md:table-cell align-middle">
                     {new Date(app.createdAt).toLocaleDateString("en-GB")}
                   </td>
                 </tr>
@@ -82,7 +116,7 @@ export default async function ApprovedPage() {
               {applications.length === 0 && (
                 <tr>
                   <td
-                    colSpan={6}
+                    colSpan={7}
                     className="px-5 py-8 text-center text-slate-400"
                   >
                     No approved students yet.

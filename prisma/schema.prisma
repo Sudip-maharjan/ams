@@ -107,6 +107,9 @@ model StudentApplication {
   documentFlags Json?
   documentPaths Json?
 
+  biometricPhotoUrl String?
+  biometricCapturedAt DateTime?
+
   @@index([status])
   @@index([createdAt])
   @@index([program])

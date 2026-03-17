@@ -1,4 +1,3 @@
-// app/admin/(protected)/approve/page.tsx
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import ApprovalWizard from "./ApprovalWizard";
