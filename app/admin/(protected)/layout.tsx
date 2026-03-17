@@ -126,7 +126,7 @@ export default function AdminLayout({
           >
             <Menu className="w-5 h-5" />
           </button>
-          <h1 className="text-sm font-semibold text-slate-700 capitalize">
+          <h1 className="text-xl font-semibold text-slate-700 capitalize">
             {navItems.find((n) => isActive(n.href, n.exact))?.label ?? "Admin"}
           </h1>
         </header>

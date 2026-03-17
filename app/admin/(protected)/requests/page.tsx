@@ -78,7 +78,7 @@ export default async function RequestsPage({
       </div>
 
       {/* Table — fixed height, scrolls internally */}
-      <div className="bg-white rounded-xl border border-slate-200 flex flex-col min-h-0 h-100">
+      <div className="bg-white rounded-xl border border-slate-200 flex flex-col min-h-0">
         {/* Table header — sticky, never scrolls */}
         <div className="px-5 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
           <h2 className="font-semibold text-slate-800">Applications</h2>
