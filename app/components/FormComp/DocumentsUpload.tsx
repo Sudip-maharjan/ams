@@ -14,9 +14,9 @@ export type DocumentsFields = {
   requiresBridgeCourse: boolean;
 
   nationalityId: File | null;
-  grade10Degree: File | null;
+  grade10Certificate: File | null;
   grade10Marksheet: File | null;
-  grade12Degree: File | null;
+  grade12Provisional: File | null;
   grade12Marksheet: File | null;
   grade12Character: File | null;
   signatureSpecimen: File | null;
@@ -43,15 +43,15 @@ const MANDATORY_DOCS: { key: keyof DocumentsFields; label: string }[] = [
     label: "National Identity card | Citizenship/ Both Side/ passport/aadhar",
   },
   {
-    key: "grade10Degree",
-    label: "Grade 10/SLC/SEE/O level Degree/Board/Provisional certificate",
+    key: "grade10Certificate",
+    label: "Grade 10/SLC/SEE Certificate/O level Degree/Board/Certificate",
   },
   {
     key: "grade10Marksheet",
     label: "Grade 10/SLC/SEE/O level Grade sheet/Transcript/Mark sheet",
   },
   {
-    key: "grade12Degree",
+    key: "grade12Provisional",
     label:
       "Grade 12/ISc/A level/PCL level Degree/Board/Provisional certificate",
   },
@@ -223,9 +223,9 @@ const emptyDocs = (): DocumentsFields => ({
   requiresCouncilCertificate: false,
   requiresBridgeCourse: false,
   nationalityId: null,
-  grade10Degree: null,
+  grade10Certificate: null,
   grade10Marksheet: null,
-  grade12Degree: null,
+  grade12Provisional: null,
   grade12Marksheet: null,
   grade12Character: null,
   signatureSpecimen: null,

@@ -12,7 +12,7 @@ export default function FormActions({
   onSubmit,
 }: FormActionsProps) {
   return (
-    <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+    <div className="bg-white rounded-xl border border-slate-200 shadow-xl overflow-hidden">
       <div className="px-8 py-6 flex flex-col sm:flex-row items-center justify-between gap-4">
         <p className="text-sm text-slate-400 text-center sm:text-left">
           Please review all sections before submitting. Fields marked{" "}

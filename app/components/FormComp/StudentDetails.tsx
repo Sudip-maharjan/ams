@@ -170,262 +170,265 @@ const StudentDetails = forwardRef<StudentDetailsHandle, StudentDetailsProps>(
           </div>
 
           <div className="px-2 py-7 space-y-5">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label required>Category</Label>
-                <SelectField
-                  placeholder="Select Category"
-                  options={CATEGORIES}
-                  value={form.category}
-                  error={errors.category}
-                  onChange={handle("category")}
-                />
-              </div>
-              {(form.category === "Scholarship" ||
-                form.category === "Foreign") && (
+            {" "}
+            <div className="border border-slate-200 shadow-sm rounded-xl p-5 space-y-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <Label required>Sub-Category</Label>
+                  <Label required>Category</Label>
                   <SelectField
-                    placeholder="Select Sub-Category"
-                    options={
-                      form.category === "Scholarship"
-                        ? SCHOLARSHIP_SUBCATEGORIES
-                        : FOREIGN_SUBCATEGORIES
-                    }
-                    value={form.subCategory}
-                    error={errors.subCategory}
-                    onChange={handle("subCategory")}
+                    placeholder="Select Category"
+                    options={CATEGORIES}
+                    value={form.category}
+                    error={errors.category}
+                    onChange={handle("category")}
                   />
                 </div>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <Label required>MEC Roll Number</Label>
-                <InputField
-                  placeholder="2024XXXX"
-                  value={form.mecRollNumber}
-                  error={errors.mecRollNumber}
-                  inputMode="numeric"
-                  numericOnly
-                  onChange={handle("mecRollNumber")}
-                />
-              </div>
-              <div>
-                <Label required>MEC Rank</Label>
-                <InputField
-                  placeholder="120"
-                  value={form.mecRank}
-                  error={errors.mecRank}
-                  inputMode="numeric"
-                  numericOnly
-                  onChange={handle("mecRank")}
-                />
-              </div>
-              <div>
-                <Label required>MEC Score</Label>
-                <InputField
-                  placeholder="100"
-                  value={form.mecScore}
-                  error={errors.mecScore}
-                  inputMode="numeric"
-                  numericOnly
-                  onChange={handle("mecScore")}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
-                <Label required>Program</Label>
-                <SelectField
-                  placeholder="Select program"
-                  options={PROGRAMS}
-                  value={form.program}
-                  error={errors.program}
-                  onChange={handle("program")}
-                />
-              </div>
-              <div>
-                <Label required>College</Label>
-                <SelectField
-                  placeholder={
-                    form.program ? "Select college" : "Select a program first"
-                  }
-                  options={availableColleges}
-                  disabled={!form.program}
-                  value={form.college}
-                  error={errors.college}
-                  onChange={handle("college")}
-                />
-                {form.program && availableColleges.length > 0 && (
-                  <p className="mt-1 text-xs text-slate-400">
-                    {availableColleges.length} college
-                    {availableColleges.length !== 1 ? "s" : ""} available for{" "}
-                    {form.program}
-                  </p>
+                {(form.category === "Scholarship" ||
+                  form.category === "Foreign") && (
+                  <div>
+                    <Label required>Sub-Category</Label>
+                    <SelectField
+                      placeholder="Select Sub-Category"
+                      options={
+                        form.category === "Scholarship"
+                          ? SCHOLARSHIP_SUBCATEGORIES
+                          : FOREIGN_SUBCATEGORIES
+                      }
+                      value={form.subCategory}
+                      error={errors.subCategory}
+                      onChange={handle("subCategory")}
+                    />
+                  </div>
                 )}
               </div>
-            </div>
 
-            <Divider label="Personal Information" />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <Label required>MEC Roll Number</Label>
+                  <InputField
+                    placeholder="2024XXXX"
+                    value={form.mecRollNumber}
+                    error={errors.mecRollNumber}
+                    inputMode="numeric"
+                    numericOnly
+                    onChange={handle("mecRollNumber")}
+                  />
+                </div>
+                <div>
+                  <Label required>MEC Rank</Label>
+                  <InputField
+                    placeholder="120"
+                    value={form.mecRank}
+                    error={errors.mecRank}
+                    inputMode="numeric"
+                    numericOnly
+                    onChange={handle("mecRank")}
+                  />
+                </div>
+                <div>
+                  <Label required>MEC Score</Label>
+                  <InputField
+                    placeholder="100"
+                    value={form.mecScore}
+                    error={errors.mecScore}
+                    inputMode="numeric"
+                    numericOnly
+                    onChange={handle("mecScore")}
+                  />
+                </div>
+              </div>
 
-            <div>
-              <Label required>Name</Label>
-              <div className="grid grid-cols-[75px_1fr] sm:grid-cols-[130px_1fr_1fr] gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label required>Program</Label>
+                  <SelectField
+                    placeholder="Select program"
+                    options={PROGRAMS}
+                    value={form.program}
+                    error={errors.program}
+                    onChange={handle("program")}
+                  />
+                </div>
+                <div>
+                  <Label required>College</Label>
+                  <SelectField
+                    placeholder={
+                      form.program ? "Select college" : "Select a program first"
+                    }
+                    options={availableColleges}
+                    disabled={!form.program}
+                    value={form.college}
+                    error={errors.college}
+                    onChange={handle("college")}
+                  />
+                  {form.program && availableColleges.length > 0 && (
+                    <p className="mt-1 text-xs text-slate-400">
+                      {availableColleges.length} college
+                      {availableColleges.length !== 1 ? "s" : ""} available for{" "}
+                      {form.program}
+                    </p>
+                  )}
+                </div>
+              </div>
+
+              <Divider label="Personal Information" />
+
+              <div>
+                <Label required>Name</Label>
+                <div className="grid grid-cols-[75px_1fr] sm:grid-cols-[130px_1fr_1fr] gap-3">
+                  <SelectField
+                    placeholder="Select"
+                    options={SALUTATIONS}
+                    value={form.salutation}
+                    error={errors.salutation}
+                    onChange={handle("salutation")}
+                  />
+                  <InputField
+                    placeholder="First name"
+                    value={form.firstName}
+                    error={errors.firstName}
+                    noNumbers
+                    onChange={handle("firstName")}
+                  />
+                  <InputField
+                    placeholder="Middle name"
+                    value={form.middleName}
+                    error={errors.middleName}
+                    noNumbers
+                    className="col-span-2 sm:col-span-1"
+                    onChange={handle("middleName")}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <Label required>Last Name</Label>
+                <InputField
+                  placeholder="Last name"
+                  value={form.lastName}
+                  error={errors.lastName}
+                  noNumbers
+                  onChange={handle("lastName")}
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <Label required>
+                    First Name (Nepali)
+                    <span
+                      className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-100 text-blue-500 text-[10px] cursor-help"
+                      title="Enter name in Devanagari script"
+                    >
+                      ?
+                    </span>
+                  </Label>
+                  <InputField
+                    placeholder="पहिलो नाम"
+                    value={form.firstNameNepali}
+                    error={errors.firstNameNepali}
+                    noNumbers
+                    onChange={handle("firstNameNepali")}
+                  />
+                </div>
+                <div>
+                  <Label>Middle Name (Nepali)</Label>
+                  <InputField
+                    placeholder="बीचको नाम"
+                    value={form.middleNameNepali}
+                    error={errors.middleNameNepali}
+                    noNumbers
+                    onChange={handle("middleNameNepali")}
+                  />
+                </div>
+                <div>
+                  <Label required>Last Name (Nepali)</Label>
+                  <InputField
+                    placeholder="थर"
+                    value={form.lastNameNepali}
+                    error={errors.lastNameNepali}
+                    noNumbers
+                    onChange={handle("lastNameNepali")}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <Label required>Date of Birth (AD)</Label>
+                  <InputField
+                    placeholder="YYYY-MM-DD"
+                    type="date"
+                    value={form.dobAD}
+                    error={errors.dobAD}
+                    onChange={handle("dobAD")}
+                  />
+                </div>
+                <div>
+                  <Label>Date of Birth (BS)</Label>
+                  <InputField
+                    placeholder="YYYY-MM-DD"
+                    type="date"
+                    value={form.dobBS}
+                    error={errors.dobBS}
+                    onChange={handle("dobBS")}
+                  />
+                </div>
+                <div>
+                  <Label required>Gender</Label>
+                  <SelectField
+                    placeholder="Select Gender"
+                    options={GENDERS}
+                    value={form.gender}
+                    error={errors.gender}
+                    onChange={handle("gender")}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <Label required>Mobile Number (Nepali)</Label>
+                  <InputField
+                    placeholder="98XXXXXXXX"
+                    type="tel"
+                    value={form.mobileNumber}
+                    error={errors.mobileNumber}
+                    onChange={handle("mobileNumber")}
+                  />
+                </div>
+                <div>
+                  <Label required>Email</Label>
+                  <InputField
+                    placeholder="example@example.com"
+                    type="email"
+                    value={form.email}
+                    error={errors.email}
+                    onChange={handle("email")}
+                  />
+                </div>
+                <div>
+                  <Label>Blood Group</Label>
+                  <SelectField
+                    placeholder="Select Blood Group"
+                    options={BLOOD_GROUPS}
+                    value={form.bloodGroup}
+                    error={errors.bloodGroup}
+                    onChange={handle("bloodGroup")}
+                  />
+                </div>
+              </div>
+
+              <div className="max-w-xs">
+                <Label required>Nationality Document Type</Label>
                 <SelectField
-                  placeholder="Select"
-                  options={SALUTATIONS}
-                  value={form.salutation}
-                  error={errors.salutation}
-                  onChange={handle("salutation")}
-                />
-                <InputField
-                  placeholder="First name"
-                  value={form.firstName}
-                  error={errors.firstName}
-                  noNumbers
-                  onChange={handle("firstName")}
-                />
-                <InputField
-                  placeholder="Middle name"
-                  value={form.middleName}
-                  error={errors.middleName}
-                  noNumbers
-                  className="col-span-2 sm:col-span-1"
-                  onChange={handle("middleName")}
+                  placeholder="Select Nationality Document Type"
+                  options={NATIONALITY_DOCS}
+                  value={form.nationalityDocType}
+                  error={errors.nationalityDocType}
+                  onChange={handle("nationalityDocType")}
                 />
               </div>
-            </div>
-
-            <div>
-              <Label required>Last Name</Label>
-              <InputField
-                placeholder="Last name"
-                value={form.lastName}
-                error={errors.lastName}
-                noNumbers
-                onChange={handle("lastName")}
-              />
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <Label required>
-                  First Name (Nepali)
-                  <span
-                    className="ml-1.5 inline-flex items-center justify-center w-4 h-4 rounded-full bg-blue-100 text-blue-500 text-[10px] cursor-help"
-                    title="Enter name in Devanagari script"
-                  >
-                    ?
-                  </span>
-                </Label>
-                <InputField
-                  placeholder="पहिलो नाम"
-                  value={form.firstNameNepali}
-                  error={errors.firstNameNepali}
-                  noNumbers
-                  onChange={handle("firstNameNepali")}
-                />
-              </div>
-              <div>
-                <Label>Middle Name (Nepali)</Label>
-                <InputField
-                  placeholder="बीचको नाम"
-                  value={form.middleNameNepali}
-                  error={errors.middleNameNepali}
-                  noNumbers
-                  onChange={handle("middleNameNepali")}
-                />
-              </div>
-              <div>
-                <Label required>Last Name (Nepali)</Label>
-                <InputField
-                  placeholder="थर"
-                  value={form.lastNameNepali}
-                  error={errors.lastNameNepali}
-                  noNumbers
-                  onChange={handle("lastNameNepali")}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <Label required>Date of Birth (AD)</Label>
-                <InputField
-                  placeholder="YYYY-MM-DD"
-                  type="date"
-                  value={form.dobAD}
-                  error={errors.dobAD}
-                  onChange={handle("dobAD")}
-                />
-              </div>
-              <div>
-                <Label>Date of Birth (BS)</Label>
-                <InputField
-                  placeholder="YYYY-MM-DD"
-                  type="date"
-                  value={form.dobBS}
-                  error={errors.dobBS}
-                  onChange={handle("dobBS")}
-                />
-              </div>
-              <div>
-                <Label required>Gender</Label>
-                <SelectField
-                  placeholder="Select Gender"
-                  options={GENDERS}
-                  value={form.gender}
-                  error={errors.gender}
-                  onChange={handle("gender")}
-                />
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-              <div>
-                <Label required>Mobile Number (Nepali)</Label>
-                <InputField
-                  placeholder="98XXXXXXXX"
-                  type="tel"
-                  value={form.mobileNumber}
-                  error={errors.mobileNumber}
-                  onChange={handle("mobileNumber")}
-                />
-              </div>
-              <div>
-                <Label required>Email</Label>
-                <InputField
-                  placeholder="example@example.com"
-                  type="email"
-                  value={form.email}
-                  error={errors.email}
-                  onChange={handle("email")}
-                />
-              </div>
-              <div>
-                <Label>Blood Group</Label>
-                <SelectField
-                  placeholder="Select Blood Group"
-                  options={BLOOD_GROUPS}
-                  value={form.bloodGroup}
-                  error={errors.bloodGroup}
-                  onChange={handle("bloodGroup")}
-                />
-              </div>
-            </div>
-
-            <div className="max-w-xs">
-              <Label required>Nationality Document Type</Label>
-              <SelectField
-                placeholder="Select Nationality Document Type"
-                options={NATIONALITY_DOCS}
-                value={form.nationalityDocType}
-                error={errors.nationalityDocType}
-                onChange={handle("nationalityDocType")}
-              />
             </div>
           </div>
         </div>

@@ -51,9 +51,9 @@ function validateAddressBlock(block: AddressBlock, label: string): string[] {
 
 const FILE_KEYS = [
   "nationalityId",
-  "grade10Degree",
+  "grade10Certificate",
   "grade10Marksheet",
-  "grade12Degree",
+  "grade12Provisional",
   "grade12Marksheet",
   "grade12Character",
   "signatureSpecimen",
@@ -184,9 +184,9 @@ export async function POST(req: NextRequest) {
 
     const mandatoryFileKeys: FileKey[] = [
       "nationalityId",
-      "grade10Degree",
+      "grade10Certificate",
       "grade10Marksheet",
-      "grade12Degree",
+      "grade12Provisional",
       "grade12Marksheet",
       "grade12Character",
       "signatureSpecimen",

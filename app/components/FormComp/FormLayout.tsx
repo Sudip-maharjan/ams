@@ -90,9 +90,9 @@ export default function FormLayout() {
 
       const fileKeys = [
         "nationalityId",
-        "grade10Degree",
+        "grade10Certificate",
         "grade10Marksheet",
-        "grade12Degree",
+        "grade12Provisional",
         "grade12Marksheet",
         "grade12Character",
         "signatureSpecimen",
